@@ -71,6 +71,22 @@ function _openWebViewDialog() {
   );
 }
 
+function _openSourceDocDialog() {
+  const docId = _getDocId();
+  if (!docId) {
+    SpreadsheetApp.getUi().alert(
+      "No DOC_ID found in CONFIG or Script Properties.",
+    );
+    return;
+  }
+  const url = `https://docs.google.com/document/d/${docId}/edit`;
+  const html = `<a href="${url}" target="_blank">Open the Source Document</a>`;
+  SpreadsheetApp.getUi().showModalDialog(
+    HtmlService.createHtmlOutput(html),
+    "Open the Source Document",
+  );
+}
+
 /***** CONTACTS *****/
 function _getContacts() {
   const sh = _sheet();
