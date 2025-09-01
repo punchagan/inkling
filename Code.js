@@ -171,56 +171,91 @@ function _extractEditionSection(rawHtml, subject) {
   }
 }
 
-/***** Prepare email HTML (optionally add “View in browser” banner) + inline images as cid *****/
-function _prepareEmailFromDocHtml(rawHtml, browserUrl) {
-  let html = rawHtml;
+/* Get DOC_ID from Script Properties if not set in CONFIG */
+function _getDocId() {
+  if (CONFIG.DOC_ID) return CONFIG.DOC_ID;
+  const props = PropertiesService.getScriptProperties();
+  return props.getProperty("DOC_ID");
+}
 
-  if (CONFIG.SHOW_VIEW_IN_BROWSER_BANNER && browserUrl) {
-    const banner = `<div style="font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial; color:#555; background:#fafafa; padding:10px 12px; border-bottom:1px solid #eee;">
-        Trouble viewing? <a href="${browserUrl}" target="_blank" rel="noopener">View in browser</a>
-      </div>`;
-    html = banner + html;
-  }
+/** Prepare the Doc section ONCE for email (inline images, strip scripts).
+ *  Returns { bodyHtml, inlineImages } – no greeting/banner/doctype here.
+ */
+function _prepareEmailBodyOnce(editionHtml) {
+  let html = editionHtml;
 
   const inlineImages = {};
   let idx = 0;
 
+  // Inline images with OAuth for Drive/Docs URLs when needed
   html = html.replace(
     /<img\b[^>]*src=["']([^"']+)["'][^>]*>/gi,
     (match, src) => {
       try {
-        const res = UrlFetchApp.fetch(src, {
+        const needsAuth =
+          /googleusercontent\.com|docs\.google\.com|drive\.google\.com/i.test(
+            src,
+          );
+        const params = {
           muteHttpExceptions: true,
           followRedirects: true,
-        });
+        };
+        if (needsAuth) {
+          params.headers = {
+            Authorization: "Bearer " + ScriptApp.getOAuthToken(),
+          };
+        }
+        const res = UrlFetchApp.fetch(src, params);
         if (res.getResponseCode() >= 200 && res.getResponseCode() < 300) {
           const blob = res.getBlob();
           const cid = `img${idx++}`;
           inlineImages[cid] = blob;
           return match.replace(src, `cid:${cid}`);
         }
-      } catch (_) {
-        /* leave original src for web view */
+      } catch (e) {
+        // If fetch fails, keep original src so it will still work in web view
       }
       return match;
     },
   );
 
-  // Strip scripts for email safety
+  // Remove scripts for email safety
   html = html.replace(/<script[\s\S]*?<\/script>/gi, "");
 
-  // Wrap if needed
-  if (!/^<!doctype/i.test(html)) {
-    html = `<!doctype html><html><head><meta charset="utf-8"></head><body>${html}</body></html>`;
-  }
-
-  return { html, inlineImages };
+  return { bodyHtml: html, inlineImages };
 }
 
-function _getDocId() {
-  if (CONFIG.DOC_ID) return CONFIG.DOC_ID;
-  const props = PropertiesService.getScriptProperties();
-  return props.getProperty("DOC_ID");
+/** Compose the FINAL HTML per recipient (adds banner + greeting + body, and wraps with <!doctype>).
+ *  Call this inside your send loop with each name.
+ */
+function _composeEmailHtml(name, bodyHtml, browserUrl) {
+  const safeName = _escapeHtml(_sanitizeName(name));
+
+  const banner =
+    CONFIG.SHOW_VIEW_IN_BROWSER_BANNER && browserUrl
+      ? `<div style="font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;color:#555;background:#fafafa;padding:10px 12px;border-bottom:1px solid #eee;">
+           Trouble viewing? <a href="${browserUrl}" target="_blank" rel="noopener">View in browser</a>
+         </div>`
+      : "";
+
+  const greeting = `<div style="font:16px/1.5 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;margin:20px 0;">
+       Hi ${safeName},
+     </div>`;
+
+  const footer = `<div style="font:12px/1.5 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;color:#777;margin-top:28px;">
+       <!-- Optional footer text -->
+     </div>`;
+
+  return `<!doctype html>
+<html>
+  <head><meta charset="utf-8"></head>
+  <body>
+    ${banner}
+    ${greeting}
+    ${bodyHtml}
+    ${footer}
+  </body>
+</html>`;
 }
 
 /***** SEND: main action – picks edition by subject, emails contacts *****/
@@ -229,7 +264,7 @@ function _sendEmailsFromDoc(contacts, test = true) {
   if (!subject)
     return _setMsg(`Enter a subject in ${CONFIG.SHEET.SUBJECT_CELL}`, false);
 
-  const webAppUrl = _getWebAppUrl(); // empty before first deployment
+  const webAppUrl = _getWebAppUrl(); // may be empty before first deployment
   _setMsg("Fetching document…");
   const rawDocHtml = _fetchDocHtml(_getDocId());
   const editionHtml = _extractEditionSection(rawDocHtml, subject);
@@ -238,10 +273,9 @@ function _sendEmailsFromDoc(contacts, test = true) {
       `Could not find any Heading 1 with the text: ${subject}`,
       false,
     );
-  const { html, inlineImages } = _prepareEmailFromDocHtml(
-    editionHtml,
-    webAppUrl,
-  );
+
+  // 1) Prepare body ONCE (inline images etc.)
+  const { bodyHtml, inlineImages } = _prepareEmailBodyOnce(editionHtml);
 
   const emailSubject = test ? `[TEST] ${subject}` : subject;
   _setMsg(`Sending “${emailSubject}” to ${contacts.length}…`);
@@ -261,13 +295,16 @@ function _sendEmailsFromDoc(contacts, test = true) {
       continue;
     }
 
-    const personalizedHtml = html.replace(/\[\[NAME\]\]/g, _sanitizeName(name));
+    // 2) Compose per-recipient FINAL HTML (adds greeting/banner/footer)
+    const personalizedHtml = _composeEmailHtml(name, bodyHtml, webAppUrl);
 
     try {
-      GmailApp.sendEmail(email, emailSubject, _stripHtml(personalizedHtml), {
-        htmlBody: personalizedHtml,
-        inlineImages,
-      });
+      GmailApp.sendEmail(
+        email,
+        emailSubject,
+        _stripHtml(personalizedHtml), // plain-text fallback
+        { htmlBody: personalizedHtml, inlineImages },
+      );
       statusCell
         .setValue(`Sent ${new Date().toLocaleString()}`)
         .setTextStyle(_okStyle);
