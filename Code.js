@@ -43,13 +43,17 @@ const _escapeHtml = (s) =>
     (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c],
   );
 const _sanitizeName = (n) => String(n || "").trim() || "there";
-const _getWebAppUrl = () => {
+function _getWebAppExecUrl() {
+  const props = PropertiesService.getScriptProperties();
+  const override = props.getProperty("WEBAPP_BASE_URL"); // preferred
+  if (override) return String(override).replace(/\/dev$/, "/exec");
   try {
-    return ScriptApp.getService().getUrl();
-  } catch (e) {
+    const url = ScriptApp.getService().getUrl(); // fallback
+    return url ? url.replace(/\/dev$/, "/exec") : "";
+  } catch (_) {
     return "";
   }
-};
+}
 
 /***** MENU *****/
 function onOpen() {
@@ -63,7 +67,7 @@ function onOpen() {
 }
 
 function openWebView() {
-  const url = _getWebAppUrl();
+  const url = _getWebAppExecUrl();
   if (!url)
     return _setMsg(
       "Deploy the Web App first (Deploy → New deployment).",
@@ -264,7 +268,7 @@ function _sendEmailsFromDoc(contacts, test = true) {
   if (!subject)
     return _setMsg(`Enter a subject in ${CONFIG.SHEET.SUBJECT_CELL}`, false);
 
-  const webAppBaseUrl = _getWebAppUrl(); // may be empty before first deployment
+  const webAppBaseUrl = _getWebAppExecUrl();
   const webAppUrl = webAppBaseUrl
     ? `${webAppBaseUrl}?subject=${encodeURIComponent(subject)}`
     : "";
@@ -392,8 +396,7 @@ function doGet(e) {
   const subjectParam = e && e.parameter && e.parameter.subject;
   const subject = subjectParam ? String(subjectParam).trim() : "";
 
-  // Force the deployed base to /exec (not /dev), and use it as the <base> href
-  const execBase = _getWebAppUrl().replace(/\/dev$/, "/exec");
+  const execBase = _getWebAppExecUrl();
 
   const webAppTitle =
     CONFIG.WEBAPP_TITLE || Drive.Files.get(docId).name || "Newsletter";
