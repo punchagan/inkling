@@ -328,28 +328,6 @@ function _sendEmailsFromDoc(contacts, test = true) {
   _setMsg(`Done. Sent: ${sent}, Failed: ${failed}`);
 }
 
-/***** SEND TEST: sends current edition only to you (or first contact if Session email not available) *****/
-function sendTestToMe() {
-  let me = Session.getActiveUser().getEmail();
-  let name = "Tester";
-  if (!me) {
-    const contacts = _getContacts();
-    if (contacts.length === 0)
-      return _setMsg("No contacts found for a test send.", false);
-    me = contacts[0][1];
-    name = contacts[0][0];
-  }
-  let emailContacts = [[name, me, 2]];
-  _sendEmailsFromDoc(emailContacts, true);
-}
-
-function sendEmailsFromDoc() {
-  const contacts = _getContacts();
-  if (contacts.length === 0)
-    return _setMsg("No contacts found (A: Name, B: Email).", false);
-  _sendEmailsFromDoc(contacts, false);
-}
-
 function _extractAllH1Titles(rawHtml) {
   // returns an array of clean H1 texts (in Doc order)
   const titles = [];
