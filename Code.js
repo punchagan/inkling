@@ -55,18 +55,7 @@ function _getWebAppExecUrl() {
   }
 }
 
-/***** MENU *****/
-function onOpen() {
-  SpreadsheetApp.getUi()
-    .createMenu("Newsletter")
-    .addItem("Send from Doc", "sendEmailsFromDoc")
-    .addItem("Send test to me", "sendTestToMe")
-    .addSeparator()
-    .addItem("Open Web View", "openWebView")
-    .addToUi();
-}
-
-function openWebView() {
+function _openWebViewDialog() {
   const url = _getWebAppExecUrl();
   if (!url)
     return _setMsg(
