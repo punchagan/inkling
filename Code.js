@@ -382,7 +382,6 @@ function _archiveListHtml(titles, pageTitle) {
     .join("\n");
   return `
     <h1 style="margin:0 0 12px">${_escapeHtml(pageTitle)}</h1>
-    <p class="note" style="margin:0 0 16px">Click a title to view that edition.</p>
     <ol style="padding-left:20px; line-height:1.7">${items}</ol>
   `;
 }
