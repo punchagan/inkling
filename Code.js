@@ -9,7 +9,7 @@ const CONFIG = {
     CONTACTS_RANGE_START: "A2", // A: Name, B: Email
   },
 
-  WEBAPP_TITLE: "View in Browser",
+  WEBAPP_TITLE: null, // null = use Doc's title
   SHOW_VIEW_IN_BROWSER_BANNER: true, // adds a “View in browser” link atop emails
   RATE_LIMIT_MS: 1200, // gentle pause between sends
 };
@@ -348,17 +348,20 @@ function doGet(e) {
   const subjectParam = e && e.parameter && e.parameter.subject;
   const subject = subjectParam || _getSubject(); // default to D2 if not provided
 
-  const rawDocHtml = _fetchDocHtml(CONFIG.DOC_ID);
+  const docId = _getDocId();
+  const rawDocHtml = _fetchDocHtml(docId);
   const editionHtml = _extractEditionSection(rawDocHtml, subject);
 
+  // Get title from config or doc
+  const webAppTitle =
+    CONFIG.WEBAPP_TITLE || Drive.Files.get(docId).name || "Newsletter";
+
   const shell = `
-    <!doctype html><html>
+    <!doctype html>
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width,initial-scale=1">
-        <title>${_escapeHtml(subject)} — ${_escapeHtml(
-          CONFIG.WEBAPP_TITLE,
-        )}</title>
+        <title>${_escapeHtml(subject)} — ${_escapeHtml(webAppTitle)}</title>
         <style>
           :root{--fg:#111;--muted:#666;--max:780px}
           body{font:16px/1.6 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial;margin:24px;color:var(--fg);background:#fff}
