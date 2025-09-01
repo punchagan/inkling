@@ -62,8 +62,12 @@ function _openWebViewDialog() {
       "Deploy the Web App first (Deploy → New deployment).",
       false,
     );
-  SpreadsheetApp.getUi().alert(
-    `Web View URL:\n\n${url}\n\n(You can pass ?subject=... to view older editions)`,
+  // Open URL in a dialog (cannot open new tab directly from Apps Script)
+  // Show clickable link
+  const html = `Open the <a href=${url} target="_blank">web view</a> in a new tab`;
+  SpreadsheetApp.getUi().showModalDialog(
+    HtmlService.createHtmlOutput(html),
+    "Open Web View",
   );
 }
 
