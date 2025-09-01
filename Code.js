@@ -347,7 +347,7 @@ function sendEmailsFromDoc() {
   const contacts = _getContacts();
   if (contacts.length === 0)
     return _setMsg("No contacts found (A: Name, B: Email).", false);
-  _sendEmailsFromDoc(contacts, (test = false));
+  _sendEmailsFromDoc(contacts, false);
 }
 
 function _extractAllH1Titles(rawHtml) {
