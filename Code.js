@@ -346,42 +346,100 @@ function sendEmailsFromDoc() {
   _sendEmailsFromDoc(contacts, (test = false));
 }
 
-/***** WEB APP – shows the same edition in the browser (Google login via deployment settings) *****/
+function _extractAllH1Titles(rawHtml) {
+  // returns an array of clean H1 texts (in Doc order)
+  const titles = [];
+  const re = /<h1\b[^>]*>([\s\S]*?)<\/h1>/gi;
+  let m;
+  while ((m = re.exec(rawHtml)) !== null) {
+    const inner = m[1] || "";
+    const text = inner
+      .replace(/<[^>]+>/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (text) titles.push(text);
+  }
+  // de-dupe while keeping order
+  const seen = new Set();
+  return titles.filter((t) => (seen.has(t) ? false : (seen.add(t), true)));
+}
+
+function _archiveListHtml(titles, pageTitle) {
+  if (!titles || titles.length === 0) {
+    return `<p>No editions found (no <code>Heading 1</code> in the Doc).</p>`;
+  }
+  const items = titles
+    .map((t) => {
+      const url = `?subject=${encodeURIComponent(t)}`; // relative; base+target will make it top-level /exec
+      return `<li><a href="${url}" target="_top" rel="noopener">${_escapeHtml(
+        t,
+      )}</a></li>`;
+    })
+    .join("\n");
+  return `
+    <h1 style="margin:0 0 12px">${_escapeHtml(pageTitle)}</h1>
+    <p class="note" style="margin:0 0 16px">Click a title to view that edition.</p>
+    <ol style="padding-left:20px; line-height:1.7">${items}</ol>
+  `;
+}
+
+/***** WEB APP – shows the same edition in the browser (Google login via
+ * deployment settings) *****/
 function doGet(e) {
   const docId = _getDocId();
   const rawDocHtml = _fetchDocHtml(docId);
 
   const subjectParam = e && e.parameter && e.parameter.subject;
-  const subject = subjectParam || _getSubject(); // default to D2 if not provided
-  const editionHtml = _extractEditionSection(rawDocHtml, subject);
+  const subject = subjectParam ? String(subjectParam).trim() : "";
 
-  // Get title from config or doc
+  // Force the deployed base to /exec (not /dev), and use it as the <base> href
+  const execBase = _getWebAppUrl().replace(/\/dev$/, "/exec");
+
   const webAppTitle =
     CONFIG.WEBAPP_TITLE || Drive.Files.get(docId).name || "Newsletter";
+  let contentHtml;
+  if (!subjectParam) {
+    const titles = _extractAllH1Titles(rawDocHtml);
+    contentHtml = _archiveListHtml(titles, webAppTitle, execBase);
+  } else {
+    contentHtml =
+      _extractEditionSection(rawDocHtml, subject) ||
+      (() => {
+        const titles = _extractAllH1Titles(rawDocHtml);
+        return `<p style="color:#b00">Couldn’t find “${_escapeHtml(
+          subject,
+        )}”.</p>${_archiveListHtml(titles, webAppTitle, execBase)}`;
+      })();
+  }
+
+  const pageTitleText = subject
+    ? `${subject} — ${webAppTitle}`
+    : `${webAppTitle} — Archive`;
 
   const shell = `
-    <!doctype html>
-      <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width,initial-scale=1">
-        <title>${_escapeHtml(subject)} — ${_escapeHtml(webAppTitle)}</title>
-        <style>
-          :root{--fg:#111;--muted:#666;--max:780px}
-          body{font:16px/1.6 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial;margin:24px;color:var(--fg);background:#fff}
-          .wrap{max-width:var(--max);margin:0 auto}
-          .note{font-size:12px;color:var(--muted);margin-bottom:12px}
-          .doc{background:#fff}
-        </style>
-      </head>
-      <body>
-        <div class="wrap">
-          <div class="note">Signed in with Google • Browser version${
-            subject ? " • “" + _escapeHtml(subject) + "”" : ""
-          }</div>
-          <div class="doc">${editionHtml}</div>
-        </div>
-      </body>
-    </html>`;
+<!doctype html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <base href="${execBase}" target="_top">  <!-- KEY LINE -->
+  <title>${_escapeHtml(pageTitleText)}</title>
+  <style>
+    :root{--fg:#111;--muted:#666;--max:780px}
+    body{font:16px/1.6 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial;margin:24px;color:var(--fg);background:#fff}
+    .wrap{max-width:var(--max);margin:0 auto}
+    .note{font-size:12px;color:var(--muted);margin-bottom:12px}
+    .doc{background:#fff}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="note">Signed in with Google • Browser version${
+      subject ? " • “" + _escapeHtml(subject) + "”" : ""
+    }</div>
+    <div class="doc">${contentHtml}</div>
+  </div>
+</body>
+</html>`;
   return HtmlService.createHtmlOutput(shell).setXFrameOptionsMode(
     HtmlService.XFrameOptionsMode.ALLOWALL,
   );
