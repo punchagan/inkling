@@ -264,7 +264,10 @@ function _sendEmailsFromDoc(contacts, test = true) {
   if (!subject)
     return _setMsg(`Enter a subject in ${CONFIG.SHEET.SUBJECT_CELL}`, false);
 
-  const webAppUrl = _getWebAppUrl(); // may be empty before first deployment
+  const webAppBaseUrl = _getWebAppUrl(); // may be empty before first deployment
+  const webAppUrl = webAppBaseUrl
+    ? `${webAppBaseUrl}?subject=${encodeURIComponent(subject)}`
+    : "";
   _setMsg("Fetching document…");
   const rawDocHtml = _fetchDocHtml(_getDocId());
   const editionHtml = _extractEditionSection(rawDocHtml, subject);
@@ -345,11 +348,11 @@ function sendEmailsFromDoc() {
 
 /***** WEB APP – shows the same edition in the browser (Google login via deployment settings) *****/
 function doGet(e) {
-  const subjectParam = e && e.parameter && e.parameter.subject;
-  const subject = subjectParam || _getSubject(); // default to D2 if not provided
-
   const docId = _getDocId();
   const rawDocHtml = _fetchDocHtml(docId);
+
+  const subjectParam = e && e.parameter && e.parameter.subject;
+  const subject = subjectParam || _getSubject(); // default to D2 if not provided
   const editionHtml = _extractEditionSection(rawDocHtml, subject);
 
   // Get title from config or doc
