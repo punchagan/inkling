@@ -402,7 +402,7 @@ function doGet(e) {
   let contentHtml;
   if (!subjectParam) {
     const titles = _extractAllH1Titles(rawDocHtml);
-    contentHtml = _archiveListHtml(titles, webAppTitle, execBase);
+    contentHtml = _archiveListHtml(titles, webAppTitle);
   } else {
     contentHtml =
       _extractEditionSection(rawDocHtml, subject) ||
@@ -410,7 +410,7 @@ function doGet(e) {
         const titles = _extractAllH1Titles(rawDocHtml);
         return `<p style="color:#b00">Couldn’t find “${_escapeHtml(
           subject,
-        )}”.</p>${_archiveListHtml(titles, webAppTitle, execBase)}`;
+        )}”.</p>${_archiveListHtml(titles, webAppTitle)}`;
       })();
   }
 
