@@ -32,6 +32,17 @@ page (with an archive of past editions).
 This section is for writers who just want to use Inkling without installing
 `clasp` or using git.
 
+### Create a Google Doc
+
+- The document will contain the content for the articles of the newsletter. 
+- Each edition starts with a new **Heading 1**.
+- You can add a footer to be included in all the emails and the web pages, by
+  adding a **Heading 2** with the text **Footer**, before the first **Heading
+  1** entry.
+- You can start by creating a copy of this [sample document], if you prefer
+
+[sample document]: https://docs.google.com/document/d/1kgCmkiNCAKmBgc7aK2e_M-AGWNf3nzOUMFt62Tnd6wg/edit?usp=sharing
+
 ### Create a Google Sheet
 
 The Sheet will hold:
