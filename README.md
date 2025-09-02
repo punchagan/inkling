@@ -1,8 +1,6 @@
 # Inkling
 
-> Write in Docs, send from Sheets, share via Web.
-
-Inkling is a tiny toolkit to publish a personal newsletter using **Google Docs + Google Sheets + Apps Script**.
+Inkling is a tiny toolkit to publish a personal newsletter using Google's tools.
 
 Write your content in a single Google Doc, keep your contacts in a Google
 Sheet, send personalized emails via Gmail, and provide a "View in browser" web
