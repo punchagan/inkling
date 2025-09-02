@@ -1,14 +1,9 @@
 const sendTestToMe = () => {
   let me = Session.getActiveUser().getEmail();
-  let name = "Tester";
   if (!me) {
-    const contacts = _getContacts();
-    if (contacts.length === 0)
-      return _setMsg("No contacts found for a test send.", false);
-    me = contacts[0][1];
-    name = contacts[0][0];
+    return _setMsg("No contacts found for a test send.", false);
   }
-  let emailContacts = [[name, me, 2]];
+  let emailContacts = [["Tester", me, 2]];
   _sendEmailsFromDoc(emailContacts, true);
 };
 
