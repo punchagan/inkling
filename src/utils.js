@@ -1,17 +1,12 @@
-/***** CONFIG – EDIT THESE *****/
 const CONFIG = {
-  // Example: "1A2B3C4D5E6F7G8H9I0J" (the long ID from your Google Doc URL)
-  DOC_ID: null, // ← REQUIRED: Set this as Script Property in Project Settings
   SHEET: {
     SUBJECT_CELL: "D2", // email subject; must match the edition's H1
     MSG_CELL: "D4", // status messages from the script
     STATUS_COL: "C", // per-row status writeback
     CONTACTS_RANGE_START: "A2", // A: Name, B: Email
   },
-
-  WEBAPP_TITLE: null, // null = use Doc's title
-  SHOW_VIEW_IN_BROWSER_BANNER: true, // adds a “View in browser” link atop emails
-  RATE_LIMIT_MS: 1200, // gentle pause between sends
+  SHOW_VIEW_IN_BROWSER_BANNER: true,
+  RATE_LIMIT_MS: 1200,
 };
 
 /***** STYLES FOR SHEET MESSAGES *****/
@@ -74,9 +69,7 @@ function _openWebViewDialog() {
 function _openSourceDocDialog() {
   const docId = _getDocId();
   if (!docId) {
-    SpreadsheetApp.getUi().alert(
-      "No DOC_ID found in CONFIG or Script Properties.",
-    );
+    SpreadsheetApp.getUi().alert("No DOC_ID found in Script Properties.");
     return;
   }
   const url = `https://docs.google.com/document/d/${docId}/edit`;
@@ -184,9 +177,7 @@ function _extractEditionSection(rawHtml, subject) {
   }
 }
 
-/* Get DOC_ID from Script Properties if not set in CONFIG */
 function _getDocId() {
-  if (CONFIG.DOC_ID) return CONFIG.DOC_ID;
   const props = PropertiesService.getScriptProperties();
   return props.getProperty("DOC_ID");
 }

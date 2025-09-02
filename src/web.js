@@ -7,8 +7,7 @@ function doGet(e) {
 
   const execBase = _getWebAppExecUrl();
 
-  const webAppTitle =
-    CONFIG.WEBAPP_TITLE || Drive.Files.get(docId).name || "Newsletter";
+  const webAppTitle = Drive.Files.get(docId).name || "Newsletter";
   let contentHtml;
   if (!subjectParam) {
     const titles = _extractAllH1Titles(rawDocHtml);
