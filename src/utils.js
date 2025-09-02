@@ -23,9 +23,9 @@ const _okStyle = SpreadsheetApp.newTextStyle()
 
 const _sheet = () => SpreadsheetApp.getActiveSheet();
 
-const _setMsg = (msg, ok = true) =>
+const _setMsg = (msg, ok = true, cell = CONFIG.SHEET.MSG_CELL) =>
   _sheet()
-    .getRange(CONFIG.SHEET.MSG_CELL)
+    .getRange(cell)
     .setValue(msg)
     .setTextStyle(ok ? _okStyle : _errStyle);
 
@@ -285,10 +285,10 @@ const _sendEmailsFromDoc = (contacts, test = true) => {
 
   for (let i = 0; i < contacts.length; i++) {
     const [name, email, row] = contacts[i];
-    const statusCell = sh.getRange(`${statusCol}${row}`);
+    const statusCell = `${statusCol}${row}`;
 
     if (!_isValidEmail(email)) {
-      statusCell.setValue("Invalid email").setTextStyle(_errStyle);
+      _setMsg("Invalid email", false, statusCell);
       failed++;
       continue;
     }
@@ -303,12 +303,10 @@ const _sendEmailsFromDoc = (contacts, test = true) => {
         _stripHtml(personalizedHtml), // plain-text fallback
         { htmlBody: personalizedHtml, inlineImages },
       );
-      statusCell
-        .setValue(`Sent ${new Date().toLocaleString()}`)
-        .setTextStyle(_okStyle);
+      _setMsg(`Sent ${new Date().toLocaleString()}`, true, statusCell);
       sent++;
     } catch (e) {
-      statusCell.setValue(`Error: ${e.message || e}`).setTextStyle(_errStyle);
+      _setMsg(`Error: ${e.message || e}`, false, statusCell);
       failed++;
     }
 
