@@ -9,36 +9,42 @@ const CONFIG = {
   RATE_LIMIT_MS: 1200,
 };
 
-/***** STYLES FOR SHEET MESSAGES *****/
 const _errStyle = SpreadsheetApp.newTextStyle()
   .setFontSize(9)
   .setBold(true)
   .setForegroundColor("red")
   .build();
+
 const _okStyle = SpreadsheetApp.newTextStyle()
   .setFontSize(9)
   .setBold(true)
   .setForegroundColor("green")
   .build();
 
-/***** UTILITIES *****/
 const _sheet = () => SpreadsheetApp.getActiveSheet();
+
 const _setMsg = (msg, ok = true) =>
   _sheet()
     .getRange(CONFIG.SHEET.MSG_CELL)
     .setValue(msg)
     .setTextStyle(ok ? _okStyle : _errStyle);
+
 const _getSubject = () =>
   _sheet().getRange(CONFIG.SHEET.SUBJECT_CELL).getValue();
+
 const _isValidEmail = (e) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(e || ""));
+
 const _stripHtml = (s) => String(s).replace(/<[^>]+>/g, " ");
+
 const _escapeHtml = (s) =>
   String(s).replace(
     /[&<>"]/g,
     (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c],
   );
+
 const _sanitizeName = (n) => String(n || "").trim() || "there";
-function _getWebAppExecUrl() {
+
+const _getWebAppExecUrl = () => {
   const props = PropertiesService.getScriptProperties();
   const override = props.getProperty("WEBAPP_BASE_URL"); // preferred
   if (override) return String(override).replace(/\/dev$/, "/exec");
@@ -48,9 +54,9 @@ function _getWebAppExecUrl() {
   } catch (_) {
     return "";
   }
-}
+};
 
-function _openWebViewDialog() {
+const _openWebViewDialog = () => {
   const url = _getWebAppExecUrl();
   if (!url)
     return _setMsg(
@@ -64,9 +70,9 @@ function _openWebViewDialog() {
     HtmlService.createHtmlOutput(html),
     "Open Web View",
   );
-}
+};
 
-function _openSourceDocDialog() {
+const _openSourceDocDialog = () => {
   const docId = _getDocId();
   if (!docId) {
     SpreadsheetApp.getUi().alert("No DOC_ID found in Script Properties.");
@@ -78,10 +84,9 @@ function _openSourceDocDialog() {
     HtmlService.createHtmlOutput(html),
     "Open the Source Document",
   );
-}
+};
 
-/***** CONTACTS *****/
-function _getContacts() {
+const _getContacts = () => {
   const sh = _sheet();
   const lastRow = sh.getLastRow();
   if (lastRow < 2) return [];
@@ -95,10 +100,9 @@ function _getContacts() {
       i + 2,
     ])
     .filter(([n, e]) => n && e);
-}
+};
 
-/***** DOC → HTML (Advanced Drive Service) *****/
-function _fetchDocHtml(docId) {
+const _fetchDocHtml = (docId) => {
   // 1) Make sure Advanced Drive Service is enabled (Services → + → Drive API)
   // 2) Ensure the target is a Google Doc, not a folder/PDF/Word/etc.
   var fileMeta;
@@ -112,9 +116,7 @@ function _fetchDocHtml(docId) {
 
   if (fileMeta.mimeType !== "application/vnd.google-apps.document") {
     throw new Error(
-      "DOC_ID must be a Google Doc. Found: " +
-        fileMeta.mimeType +
-        ". Open the Doc and copy the ID from its URL.",
+      `DOC_ID must be a Google Doc. Found ${fileMeta.mimeType}. Open the Doc and copy the ID from its URL.`,
     );
   }
 
@@ -139,16 +141,12 @@ function _fetchDocHtml(docId) {
       return resp2.getContentText("UTF-8");
     }
     throw new Error(
-      "Drive export failed (" +
-        code +
-        "): " +
-        resp2.getContentText().slice(0, 200),
+      `Drive export failed ${code}: ${resp2.getContentText().slice(0, 200)}`,
     );
   }
-}
+};
 
-/***** Extract the edition by H1 that matches the subject *****/
-function _extractEditionSection(rawHtml, subject) {
+const _extractEditionSection = (rawHtml, subject) => {
   const norm = (s) => String(s).replace(/\s+/g, " ").trim();
 
   // Split into chunks beginning at <h1 ...>
@@ -175,17 +173,14 @@ function _extractEditionSection(rawHtml, subject) {
       return thisChunk;
     }
   }
-}
+};
 
-function _getDocId() {
+const _getDocId = () => {
   const props = PropertiesService.getScriptProperties();
   return props.getProperty("DOC_ID");
-}
+};
 
-/** Prepare the Doc section ONCE for email (inline images, strip scripts).
- *  Returns { bodyHtml, inlineImages } – no greeting/banner/doctype here.
- */
-function _prepareEmailBodyOnce(editionHtml) {
+const _prepareEmailBodyOnce = (editionHtml) => {
   let html = editionHtml;
 
   const inlineImages = {};
@@ -227,12 +222,9 @@ function _prepareEmailBodyOnce(editionHtml) {
   html = html.replace(/<script[\s\S]*?<\/script>/gi, "");
 
   return { bodyHtml: html, inlineImages };
-}
+};
 
-/** Compose the FINAL HTML per recipient (adds banner + greeting + body, and wraps with <!doctype>).
- *  Call this inside your send loop with each name.
- */
-function _composeEmailHtml(name, bodyHtml, browserUrl) {
+const _composeEmailHtml = (name, bodyHtml, browserUrl) => {
   const safeName = _escapeHtml(_sanitizeName(name));
 
   const banner =
@@ -260,10 +252,9 @@ function _composeEmailHtml(name, bodyHtml, browserUrl) {
     ${footer}
   </body>
 </html>`;
-}
+};
 
-/***** SEND: main action – picks edition by subject, emails contacts *****/
-function _sendEmailsFromDoc(contacts, test = true) {
+const _sendEmailsFromDoc = (contacts, test = true) => {
   const subject = _getSubject();
   if (!subject)
     return _setMsg(`Enter a subject in ${CONFIG.SHEET.SUBJECT_CELL}`, false);
@@ -326,9 +317,9 @@ function _sendEmailsFromDoc(contacts, test = true) {
   }
 
   _setMsg(`Done. Sent: ${sent}, Failed: ${failed}`);
-}
+};
 
-function _extractAllH1Titles(rawHtml) {
+const _extractAllH1Titles = (rawHtml) => {
   // returns an array of clean H1 texts (in Doc order)
   const titles = [];
   const re = /<h1\b[^>]*>([\s\S]*?)<\/h1>/gi;
@@ -344,22 +335,21 @@ function _extractAllH1Titles(rawHtml) {
   // de-dupe while keeping order
   const seen = new Set();
   return titles.filter((t) => (seen.has(t) ? false : (seen.add(t), true)));
-}
+};
 
-function _archiveListHtml(titles, pageTitle) {
+const _archiveListHtml = (titles, pageTitle) => {
   if (!titles || titles.length === 0) {
     return `<p>No editions found (no <code>Heading 1</code> in the Doc).</p>`;
   }
   const items = titles
     .map((t) => {
-      const url = `?subject=${encodeURIComponent(t)}`; // relative; base+target will make it top-level /exec
-      return `<li><a href="${url}" target="_top" rel="noopener">${_escapeHtml(
-        t,
-      )}</a></li>`;
+      const url = `?subject=${encodeURIComponent(t)}`;
+      const title = _escapeHtml(t);
+      return `  <li><a href="${url}" target="_top" rel="noopener">${title}</a></li>`;
     })
     .join("\n");
   return `
     <h1 style="margin:0 0 12px">${_escapeHtml(pageTitle)}</h1>
     <ol style="padding-left:20px; line-height:1.7">${items}</ol>
   `;
-}
+};

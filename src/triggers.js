@@ -1,4 +1,4 @@
-function onOpen() {
+const onOpen = () => {
   SpreadsheetApp.getUi()
     .createMenu("Inkling")
     .addItem("Send test to me", "sendTestToMe")
@@ -7,4 +7,4 @@ function onOpen() {
     .addItem("Open Web View", "_openWebViewDialog")
     .addItem("Open the Source Doc", "_openSourceDocDialog")
     .addToUi();
-}
+};

@@ -1,4 +1,4 @@
-function doGet(e) {
+const doGet = (e) => {
   const docId = _getDocId();
   const rawDocHtml = _fetchDocHtml(docId);
 
@@ -54,4 +54,4 @@ function doGet(e) {
   return HtmlService.createHtmlOutput(shell).setXFrameOptionsMode(
     HtmlService.XFrameOptionsMode.ALLOWALL,
   );
-}
+};
