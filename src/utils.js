@@ -162,15 +162,7 @@ const _extractEditionSection = (rawHtml, subject) => {
     if (!m) continue;
     const headingText = norm(m[1].replace(/<[^>]+>/g, ""));
     if (norm(headingText) === norm(subject)) {
-      // Return this H1 and all content up to (but not including) the next H1
-      const nextH1Index = section.search(/<h1\b[^>]*>/i);
-      // 'section' already starts with H1; to cut before next H1 we need to look ahead in 'parts'
-      // Simpler: rebuild as H1 + everything until the start of parts[i+1]
-      const thisChunk = section;
-      const nextChunk = parts[i + 1] || "";
-      // The raw split kept the delimiter; the cleanest is just return this chunk;
-      // because the split itself ensures next H1 starts next part.
-      return thisChunk;
+      return section;
     }
   }
 };
