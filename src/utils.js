@@ -172,8 +172,24 @@ const _getDocId = () => {
   return props.getProperty("DOC_ID");
 };
 
-const _prepareEmailBodyOnce = (editionHtml) => {
-  let html = editionHtml;
+const _neutralizeInlineFonts = (html) => {
+  // Remove font-size / font-family from any style="..."
+  html = html.replace(/style="([^"]*)"/gi, (m, styles) => {
+    const cleaned = styles
+      .replace(/(?:^|;)\s*font-size\s*:[^;"]*/gi, "")
+      .replace(/(?:^|;)\s*font-family\s*:[^;"]*/gi, "")
+      .replace(/^\s*;|\s*;$/g, "");
+    return cleaned ? `style="${cleaned}"` : ""; // drop empty style=""
+  });
+
+  // (Optional) strip any <style> blocks that define class-based fonts
+  html = html.replace(/<style[\s\S]*?<\/style>/gi, "");
+
+  return html;
+};
+
+const _prepareEmailBodyOnce = (editionHtml, footerHtml) => {
+  let html = `${editionHtml}\n${footerHtml}`;
 
   const inlineImages = {};
   let idx = 0;
@@ -219,20 +235,16 @@ const _prepareEmailBodyOnce = (editionHtml) => {
 const _composeEmailHtml = (name, bodyHtml, browserUrl) => {
   const safeName = _escapeHtml(_sanitizeName(name));
 
+  const greeting = `<div style="font:16px/1.5 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;margin:20px 0;">
+       Hi ${safeName},
+     </div>`;
+
   const banner =
     CONFIG.SHOW_VIEW_IN_BROWSER_BANNER && browserUrl
       ? `<div style="font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;color:#555;background:#fafafa;padding:10px 12px;border-bottom:1px solid #eee;">
            Trouble viewing? <a href="${browserUrl}" target="_blank" rel="noopener">View in browser</a>
          </div>`
       : "";
-
-  const greeting = `<div style="font:16px/1.5 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;margin:20px 0;">
-       Hi ${safeName},
-     </div>`;
-
-  const footer = `<div style="font:12px/1.5 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;color:#777;margin-top:28px;">
-       <!-- Optional footer text -->
-     </div>`;
 
   return `<!doctype html>
 <html>
@@ -241,9 +253,40 @@ const _composeEmailHtml = (name, bodyHtml, browserUrl) => {
     ${banner}
     ${greeting}
     ${bodyHtml}
-    ${footer}
   </body>
 </html>`;
+};
+
+const _extractWrappedFooter = (rawHtml) => {
+  // footer is a <h2>Footer</h2> before the first <h1/>. If none, empty.
+  const parts = rawHtml.split(/(?=<h1\b[^>]*>)/i);
+  if (parts.length === 0) return "";
+  const beforeFirstH1 = parts[0];
+  const partsH2 = beforeFirstH1.split(/(?=<h2\b[^>]*>)/i);
+  if (partsH2.length === 0) return "";
+  // Look for a <h2>Footer</h2>
+  for (let i = 1; i < partsH2.length; i++) {
+    const section = partsH2[i]; // starts with <h2...>
+    const m = section.match(/<h2\b[^>]*>([\s\S]*?)<\/h2>/i);
+    if (m) {
+      const inner = m[1] || "";
+      const text = inner
+        .replace(/<[^>]+>/g, "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .toLowerCase();
+      if (text === "footer") {
+        // Strip off the <h2>Footer</h2> itself and return the rest
+        const footer = _neutralizeInlineFonts(
+          section.replace(/<h2\b[^>]*>[\s\S]*?<\/h2>/i, "").trim(),
+        );
+        return `<div style="font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;padding:10px 12px;border-top:1px solid #eee;margin-top:24px;">
+                   ${footer}
+                </div>`;
+      }
+    }
+  }
+  return "";
 };
 
 const _sendEmailsFromDoc = (contacts, test = true) => {
@@ -265,7 +308,11 @@ const _sendEmailsFromDoc = (contacts, test = true) => {
     );
 
   // 1) Prepare body ONCE (inline images etc.)
-  const { bodyHtml, inlineImages } = _prepareEmailBodyOnce(editionHtml);
+  const footerHtml = _extractWrappedFooter(rawDocHtml);
+  const { bodyHtml, inlineImages } = _prepareEmailBodyOnce(
+    editionHtml,
+    footerHtml,
+  );
 
   const emailSubject = test ? `[TEST] ${subject}` : subject;
   _setMsg(`Sending “${emailSubject}” to ${contacts.length}…`);

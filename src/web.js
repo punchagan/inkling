@@ -11,6 +11,8 @@ const doGet = (e) => {
     contentHtml = _extractEditionSection(rawDocHtml, subject);
   }
 
+  const footerHtml = _extractWrappedFooter(rawDocHtml);
+
   if (!contentHtml) {
     const titles = _extractAllH1Titles(rawDocHtml);
     contentHtml = _archiveListHtml(titles, webAppTitle);
@@ -42,6 +44,9 @@ const doGet = (e) => {
 <body>
   <div class="wrap">
     <div class="doc">${contentHtml}</div>
+    <div class="footer" style="margin-top:48px;color:var(--muted);font-size:14px;line-height:1.4">
+      ${footerHtml}
+    </div>
   </div>
 </body>
 </html>`;
