@@ -32,6 +32,14 @@ const _setMsg = (msg, ok = true, cell = CONFIG.SHEET.MSG_CELL) =>
 const _getSubject = () =>
   _sheet().getRange(CONFIG.SHEET.SUBJECT_CELL).getValue();
 
+const _slugify = (s) =>
+  String(s || "")
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
 const _isValidEmail = (e) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(e || ""));
 
 const _stripHtml = (s) => String(s).replace(/<[^>]+>/g, " ");
@@ -291,15 +299,29 @@ const _extractWrappedFooter = (rawHtml) => {
   return "";
 };
 
+const _articleURL = (subject, relative = false, forNetlify = false) => {
+  const props = PropertiesService.getScriptProperties();
+  const netlifyURL = props.getProperty("NETLIFY_URL");
+  let webAppUrl;
+
+  if (netlifyURL && forNetlify) {
+    const slug = _slugify(subject);
+    const path = `/article/${slug}.html`;
+    webAppUrl = relative ? path : `${netlifyURL.replace(/\/$/, "")}${path}`;
+  } else {
+    const params = `?subject=${encodeURIComponent(subject)}`;
+    webAppUrl = relative ? `${_getWebAppExecUrl()}${params}` : "";
+  }
+
+  return webAppUrl;
+};
+
 const _sendEmailsFromDoc = (contacts, test = true) => {
   const subject = _getSubject();
   if (!subject)
     return _setMsg(`Enter a subject in ${CONFIG.SHEET.SUBJECT_CELL}`, false);
 
-  const webAppBaseUrl = _getWebAppExecUrl();
-  const webAppUrl = webAppBaseUrl
-    ? `${webAppBaseUrl}?subject=${encodeURIComponent(subject)}`
-    : "";
+  const webAppUrl = _articleURL(subject, false, true);
   _setMsg("Fetching document…");
   const rawDocHtml = _fetchDocHtml(_getDocId());
   const editionHtml = _extractEditionSection(rawDocHtml, subject);
@@ -376,14 +398,14 @@ const _extractAllH1Titles = (rawHtml) => {
   return titles.filter((t) => (seen.has(t) ? false : (seen.add(t), true)));
 };
 
-const _archiveListHtml = (titles, pageTitle) => {
+const _archiveListHtml = (titles, pageTitle, forNetlify) => {
   if (!titles || titles.length === 0) {
     return `<p>No editions found (no <code>Heading 1</code> in the Doc).</p>`;
   }
   const items = titles
     .map((t) => {
-      const url = `?subject=${encodeURIComponent(t)}`;
       const title = _escapeHtml(t);
+      const url = _articleURL(title, true, forNetlify);
       return `  <li><a href="${url}" target="_top" rel="noopener">${title}</a></li>`;
     })
     .join("\n");
@@ -426,9 +448,14 @@ const _buildWebHtml = (
   return html;
 };
 
-const _buildIndexHtml = (rawDocHtml, webAppTitle, subject = null) => {
+const _buildIndexHtml = (
+  rawDocHtml,
+  webAppTitle,
+  subject = null,
+  forNetlify = false,
+) => {
   const titles = _extractAllH1Titles(rawDocHtml);
-  const contentHtml = _archiveListHtml(titles, webAppTitle);
+  const contentHtml = _archiveListHtml(titles, webAppTitle, forNetlify);
   if (subject) {
     const subject_ = `“${_escapeHtml(subject)}”`;
     const prefix = `<p style="color:#b00">Couldn’t find ${subject_}".</p>`;

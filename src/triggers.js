@@ -6,5 +6,7 @@ const onOpen = () => {
     .addSeparator()
     .addItem("Open Web View", "_openWebViewDialog")
     .addItem("Open the Source Doc", "_openSourceDocDialog")
+    .addSeparator()
+    .addItem("Deploy site to Netlify", "deployToNetlify")
     .addToUi();
 };
