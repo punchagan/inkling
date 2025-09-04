@@ -10,23 +10,13 @@ const doGet = (e) => {
   if (subject) {
     contentHtml = _extractEditionSection(rawDocHtml, subject);
   }
-
-  const footerHtml = _extractWrappedFooter(rawDocHtml);
-
   if (!contentHtml) {
-    const titles = _extractAllH1Titles(rawDocHtml);
-    contentHtml = _archiveListHtml(titles, webAppTitle);
-    if (subject) {
-      const subject_ = `“${_escapeHtml(subject)}”`;
-      const prefix = `<p style="color:#b00">Couldn’t find ${subject_}".</p>`;
-      contentHtml = `${prefix}\n${contentHtml}`;
-    }
+    contentHtml = _buildIndexHtml(rawDocHtml, webAppTitle, subject);
   }
-
   const pageTitleText = subject
     ? `${subject} — ${webAppTitle}`
     : `${webAppTitle} — Archive`;
-
+  const footerHtml = _extractWrappedFooter(rawDocHtml);
   const html = _buildWebHtml(
     pageTitleText,
     contentHtml,

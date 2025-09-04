@@ -425,3 +425,14 @@ const _buildWebHtml = (
 </html>`;
   return html;
 };
+
+const _buildIndexHtml = (rawDocHtml, webAppTitle, subject = null) => {
+  const titles = _extractAllH1Titles(rawDocHtml);
+  const contentHtml = _archiveListHtml(titles, webAppTitle);
+  if (subject) {
+    const subject_ = `“${_escapeHtml(subject)}”`;
+    const prefix = `<p style="color:#b00">Couldn’t find ${subject_}".</p>`;
+    contentHtml = `${prefix}\n${contentHtml}`;
+  }
+  return contentHtml;
+};
