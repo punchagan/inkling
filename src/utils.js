@@ -392,3 +392,36 @@ const _archiveListHtml = (titles, pageTitle) => {
     <ol style="padding-left:20px; line-height:1.7">${items}</ol>
   `;
 };
+
+const _buildWebHtml = (
+  title,
+  contentHtml,
+  footerHtml,
+  baseUrl = "",
+  iframe = false,
+) => {
+  const html = `
+<!doctype html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  ${iframe ? `<base href="${baseUrl}" target="_top">` : ""}
+  <title>${_escapeHtml(title)}</title>
+  <style>
+    :root{--fg:#111;--muted:#666;--max:780px}
+    body{font:16px/1.6 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial;margin:24px;color:var(--fg);background:#fff}
+    .wrap{max-width:var(--max);margin:0 auto}
+    .doc{background:#fff}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="doc">${contentHtml}</div>
+    <div class="footer" style="margin-top:48px;color:var(--muted);font-size:14px;line-height:1.4">
+      ${footerHtml}
+    </div>
+  </div>
+</body>
+</html>`;
+  return html;
+};
