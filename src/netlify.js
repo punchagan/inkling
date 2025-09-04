@@ -3,6 +3,28 @@ const _sha1Hex = (bytes) => {
   return dig.map((b) => ("0" + (b & 0xff).toString(16)).slice(-2)).join("");
 };
 
+const _inlineImagesAsDataUris = (html) => {
+  return html.replace(/<img\b[^>]*src=["']([^"']+)["'][^>]*>/gi, (m, src) => {
+    try {
+      const needsAuth =
+        /googleusercontent\.com|docs\.google\.com|drive\.google\.com/i.test(
+          src,
+        );
+      const opts = { muteHttpExceptions: true, followRedirects: true };
+      if (needsAuth)
+        opts.headers = { Authorization: "Bearer " + ScriptApp.getOAuthToken() };
+      const res = UrlFetchApp.fetch(src, opts);
+      if (res.getResponseCode() >= 200 && res.getResponseCode() < 300) {
+        const b = res.getBlob();
+        const mime = b.getContentType() || "image/png";
+        const b64 = Utilities.base64Encode(b.getBytes());
+        return m.replace(src, `data:${mime};base64,${b64}`);
+      }
+    } catch (_) {}
+    return m;
+  });
+};
+
 const _netlifyApi = (method, path, payloadObj, extra) => {
   const props = PropertiesService.getScriptProperties();
   const token = props.getProperty("NETLIFY_TOKEN");
@@ -42,8 +64,9 @@ const _buildSiteFiles = () => {
   titles.forEach((title) => {
     const section = _extractEditionSection(raw, title);
     if (!section) return;
-    // FIXME: Inline images or upload them to Netlify?
-    const page = _buildWebHtml(title, section, footerHtml);
+    const page = _inlineImagesAsDataUris(
+      _buildWebHtml(title, section, footerHtml),
+    );
     const slug = _slugify(title);
     const bytes = Utilities.newBlob(page, "text/html").getBytes();
     files.push({
@@ -55,7 +78,9 @@ const _buildSiteFiles = () => {
 
   // Archive page
   const archive = _buildIndexHtml(raw, webAppTitle, null, true);
-  const page = _buildWebHtml(webAppTitle, archive, footerHtml);
+  const page = _inlineImagesAsDataUris(
+    _buildWebHtml(webAppTitle, archive, footerHtml),
+  );
   files.push({
     path: "index.html",
     bytes: Utilities.newBlob(page, "text/html").getBytes(),
