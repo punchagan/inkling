@@ -4,7 +4,8 @@ Inkling is a tiny toolkit to publish a personal newsletter using Google's tools.
 
 Write your content in a single Google Doc, keep your contacts in a Google
 Sheet, send personalized emails via Gmail, and provide a "View in browser" web
-page (with an archive of past editions).
+page (with an archive of past editions). Also supports deploying the web site
+to Netlify.
 
 ---
 
@@ -18,6 +19,12 @@ page (with an archive of past editions).
 - In the **Sheet**:
   - Set **D2** = that edition title (must exactly match the H1).
   - Fill **A** = Name, **B** = Email (leave **C** for status).
+
+- If you are using Netlify, deploy the site using **Inkling → Deploy site to
+  Netlify**. 
+  
+  **NOTE**: You may want to run this before sending any emails out, to make
+  sure there are no broken links sent out!
 
 - Test with **Inkling → Send test to me**.
 
@@ -34,7 +41,7 @@ This section is for writers who just want to use Inkling without installing
 
 ### Create a Google Doc
 
-- The document will contain the content for the articles of the newsletter. 
+- The document will contain the content for the articles of the newsletter.
 - Each edition starts with a new **Heading 1**.
 - You can add a footer to be included in all the emails and the web pages, by
   adding a **Heading 2** with the text **Footer**, before the first **Heading
@@ -74,7 +81,9 @@ doesn’t:
 
 - Function = `onOpen` • Event source = *From spreadsheet* • Event type = *On open*
 
-### Deploy the Web App (for “View in browser”)
+### Deploy the website to App Script (for “View in browser”)
+
+- If you'd like to deploy to Netlify see the section below
 
 - In the editor: **Deploy → New deployment → Web app**
 
@@ -87,6 +96,23 @@ doesn’t:
 
 > Note: Apps Script Web Apps show a blue Google banner — expected. We add
 > `<base href="…/exec/" target="_top">` to avoid iframe/preview quirks.
+
+### Deploy the website to Netlify
+
+Inkling can publish a full static site (archive + each edition as its own page)
+to Netlify. Your Apps Script builds the site and pushes it via Netlify's Deploy
+API to Netlify.
+
+- Create a Netlify account
+- Create a Netlify site (empty is fine)
+- Add your Netlify Site ID as a Script property
+  - Netlify UI → Site settings → General → Site details → API ID (copy this value).
+  - In the Google Sheet open Extensions → Apps Script → Project Settings → Script
+    Properties, and `NETLIFY_SITE_ID`.
+- Create a Personal Access Token
+  - Netlify UI → User settings → Applications → Personal access tokens → New token.
+  - Add the token as `NETLIFY_TOKEN` in your Script properties
+- Add your netlify site URL as `NETLIFY_URL` script property (e.g. https://YOUR-SITE.netlify.app)
 
 ### Script Properties
 
