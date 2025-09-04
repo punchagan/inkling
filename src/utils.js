@@ -188,9 +188,7 @@ const _neutralizeInlineFonts = (html) => {
   return html;
 };
 
-const _prepareEmailBodyOnce = (editionHtml, footerHtml) => {
-  let html = `${editionHtml}\n${footerHtml}`;
-
+const _prepareInlineImages = (html) => {
   const inlineImages = {};
   let idx = 0;
 
@@ -225,10 +223,14 @@ const _prepareEmailBodyOnce = (editionHtml, footerHtml) => {
       return match;
     },
   );
+  return { html, inlineImages };
+};
 
+const _prepareEmailBodyOnce = (editionHtml, footerHtml) => {
+  let fullHtml = `${editionHtml}\n${footerHtml}`;
+  let { html, inlineImages } = _prepareInlineImages(fullHtml);
   // Remove scripts for email safety
   html = html.replace(/<script[\s\S]*?<\/script>/gi, "");
-
   return { bodyHtml: html, inlineImages };
 };
 
