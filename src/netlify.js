@@ -145,3 +145,18 @@ const deployToNetlify = () => {
   _setMsg(`Deployed to ${url}`);
   return { url, deploy: ready };
 };
+
+const openNetlifySite = () => {
+  const props = PropertiesService.getScriptProperties();
+  const url = props.getProperty("NETLIFY_URL");
+  if (!url) {
+    SpreadsheetApp.getUi().alert("Missing NETLIFY_URL");
+    return;
+  }
+  const html = `<p>Open your Netlify site:</p>
+    <p><a href="${url}" target="_blank" rel="noopener">${url}</a></p>`;
+  SpreadsheetApp.getUi().showModalDialog(
+    HtmlService.createHtmlOutput(html).setWidth(400).setHeight(150),
+    "Netlify Site",
+  );
+};

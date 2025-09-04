@@ -8,5 +8,6 @@ const onOpen = () => {
     .addItem("Open the Source Doc", "_openSourceDocDialog")
     .addSeparator()
     .addItem("Deploy site to Netlify", "deployToNetlify")
+    .addItem("Open Netlify site", "openNetlifySite")
     .addToUi();
 };
