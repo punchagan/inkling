@@ -1,8 +1,9 @@
 const CONFIG = {
   SHEET: {
-    SUBJECT_CELL: "D2", // email subject; must match the edition's H1
-    MSG_CELL: "D4", // status messages from the script
-    STATUS_COL: "C", // per-row status writeback
+    SUBJECT_CELL: "E2", // email subject; must match the edition's H1
+    MSG_CELL: "E4", // status messages from the script
+    SEND_COL: "C", // checkbox to send or skip
+    STATUS_COL: "D", // per-row status writeback
     CONTACTS_RANGE_START: "A2", // A: Name, B: Email
   },
   SHOW_VIEW_IN_BROWSER_BANNER: true,
@@ -179,12 +180,16 @@ const _getContacts = () => {
   const lastRow = sh.getLastRow();
   if (lastRow < 2) return [];
   const rng = sh
-    .getRange(`${CONFIG.SHEET.CONTACTS_RANGE_START}:B${lastRow}`)
+    .getRange(`${CONFIG.SHEET.CONTACTS_RANGE_START}:C${lastRow}`)
     .getValues();
   return rng
-    .map(([name, email], i) => [
+    .map(([name, email, sent], i) => [
       String(name || "").trim(),
       String(email || "").trim(),
+      String(sent || "")
+        .trim()
+        .toLowerCase()
+        .charAt(0) !== "n",
       i + 2,
     ])
     .filter(([n, e]) => n && e);

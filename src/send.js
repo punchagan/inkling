@@ -8,7 +8,9 @@ const sendTestToMe = () => {
 };
 
 const sendEmailsFromDoc = () => {
-  const contacts = _getContacts();
+  const contacts = _getContacts()
+    .filter(([name, email, send, idx]) => send)
+    .map(([name, email, _, idx]) => [name, email, idx]);
   if (contacts.length === 0)
     return _setMsg("No contacts found (A: Name, B: Email).", false);
   _sendEmailsFromDoc(contacts, false);

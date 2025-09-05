@@ -16,8 +16,9 @@ to Netlify.
 - In the **Doc**: add a new **Heading 1** with your edition title, then write
   content/images below it.
 
-- In the **Sheet**:
-  - Fill **A** = Name, **B** = Email (leave **C** for status).
+- In the **Sheet**, Fill **A** = Name, **B** = Email.
+
+- If you wish to skip a contact, add _No_ in the **C** column.
 
 - If you are using Netlify, deploy the site using **Inkling → Deploy site to
   Netlify**. 
@@ -29,7 +30,7 @@ to Netlify.
 
 - Send with **Inkling → Send to ALL CONTACTS!**.
 
-- Delivery status is written to **column C**.
+- Delivery status is written to **column D**.
 
 ---
 
@@ -54,8 +55,10 @@ This section is for writers who just want to use Inkling without installing
 The Sheet will hold:
 - Names (Column **A**)
 - Emails (Column **B**)
-- Email sending status (Column **C**)
-- Script messages (cell **D4**)
+- Send? [Y/n] (Column **C**). Sends if empty. Explicitly set to N/n/No/no for
+  skipping an email.
+- Email sending status (Column **D**)
+- Script messages (cell **E4**)
 
 ### Attach a script to the Sheet
 
