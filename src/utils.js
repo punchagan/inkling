@@ -39,8 +39,6 @@ const _escapeHtml = (s) =>
     (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c],
   );
 
-const _sanitizeName = (n) => String(n || "").trim() || "there";
-
 const _getWebAppExecUrl = () => {
   const props = PropertiesService.getScriptProperties();
   const override = props.getProperty("WEBAPP_BASE_URL"); // preferred
@@ -321,7 +319,7 @@ const _prepareEmailBodyOnce = (editionHtml, footerHtml) => {
 };
 
 const _composeEmailHtml = (name, bodyHtml, browserUrl) => {
-  const safeName = _escapeHtml(_sanitizeName(name));
+  const safeName = _escapeHtml(_ensureName(name));
 
   const greeting = `<div style="font:16px/1.5 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;margin:20px 0;">
        Hi ${safeName},

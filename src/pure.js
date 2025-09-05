@@ -1,3 +1,7 @@
+const _ensureName = (n) => String(n || "").trim() || "there";
+
+const _isValidEmail = (e) => /^[^\s@]+@([^\s@.]+\.)+[^\s@.]+$/.test(e.trim());
+
 const _slugify = (s) => {
   return String(s || "")
     .toLowerCase()
@@ -6,8 +10,6 @@ const _slugify = (s) => {
     .replace(/^-+|-+$/g, "");
 };
 
-const _isValidEmail = (e) => /^[^\s@]+@([^\s@.]+\.)+[^\s@.]+$/.test(e.trim());
-
 const _stripHtml = (s) =>
   String(s)
     .replace(/<[^>]+>/g, " ")
@@ -15,8 +17,9 @@ const _stripHtml = (s) =>
 
 if (typeof module !== "undefined") {
   module.exports = {
-    _slugify,
+    _ensureName,
     _isValidEmail,
+    _slugify,
     _stripHtml,
   };
 }
