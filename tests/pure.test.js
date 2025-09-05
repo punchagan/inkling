@@ -1,4 +1,4 @@
-const { _slugify, _isValidEmail } = require("../src/pure");
+const { _slugify, _isValidEmail, _stripHtml } = require("../src/pure");
 
 test("_slugify", () => {
   expect(_slugify("Hello, World!")).toBe("hello-world");
@@ -17,4 +17,15 @@ test("_isValidEmail", () => {
   expect(_isValidEmail("username@domain..com")).toBe(false);
   expect(_isValidEmail("user@domain.com")).toBe(true);
   expect(_isValidEmail("user@domain.co.in")).toBe(true);
+});
+
+test("_stripHtml", () => {
+  expect(_stripHtml("")).toBe("");
+  expect(_stripHtml("No HTML here")).toBe("No HTML here");
+  expect(_stripHtml("<p>This is a <strong>test</strong>.</p>")).toBe(
+    "This is a  test .",
+  );
+  expect(
+    _stripHtml('<a href="http://example.com">Link</a> and <br> line break'),
+  ).toBe("Link  and   line break");
 });

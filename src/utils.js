@@ -33,8 +33,6 @@ const _setMsg = (msg, ok = true, cell = CONFIG.SHEET.MSG_CELL) =>
 const _getSubject = () =>
   _sheet().getRange(CONFIG.SHEET.SUBJECT_CELL).getValue();
 
-const _stripHtml = (s) => String(s).replace(/<[^>]+>/g, " ");
-
 const _escapeHtml = (s) =>
   String(s).replace(
     /[&<>"]/g,

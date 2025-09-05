@@ -8,9 +8,15 @@ const _slugify = (s) => {
 
 const _isValidEmail = (e) => /^[^\s@]+@([^\s@.]+\.)+[^\s@.]+$/.test(e.trim());
 
+const _stripHtml = (s) =>
+  String(s)
+    .replace(/<[^>]+>/g, " ")
+    .trim();
+
 if (typeof module !== "undefined") {
   module.exports = {
     _slugify,
     _isValidEmail,
+    _stripHtml,
   };
 }
