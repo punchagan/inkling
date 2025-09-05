@@ -82,16 +82,96 @@ const _openWebViewDialog = () => {
 
 const _openSourceDocDialog = () => {
   const docId = _getDocId();
-  if (!docId) {
-    SpreadsheetApp.getUi().alert("No DOC_ID found in Script Properties.");
-    return;
-  }
   const url = `https://docs.google.com/document/d/${docId}/edit`;
   const html = `<a href="${url}" target="_blank">Open the Source Document</a>`;
   SpreadsheetApp.getUi().showModalDialog(
     HtmlService.createHtmlOutput(html),
     "Open the Source Document",
   );
+};
+
+const _openEditionSelector = (test) => {
+  const titles = _extractAllH1Titles(_fetchDocHtml(_getDocId()));
+  if (!titles.length) {
+    SpreadsheetApp.getUi().alert(
+      "No editions found (no Heading 1 in the Doc).",
+    );
+    return;
+  }
+  const optionsHtml = titles
+    .map(function (t, i) {
+      // Escape to avoid HTML injection
+      const label = _escapeHtml(t);
+      const id = "opt_" + i;
+      return `<label style="display:block;margin:6px 0">
+            <input type="radio" name="edition" id="${id}" value="${label}" />
+            ${label}
+        </label>`;
+    })
+    .join("\n");
+
+  const title = test ? "Send TEST Email to You" : "Select Email to EVERYONE";
+
+  _setSubject(""); // Clear previous subject
+  _setMsg("Select an edition to send", true);
+
+  const html = `
+<!doctype html><meta charset="utf-8">
+<div style="font:14px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;padding:18px;max-width:520px">
+  <h2 style="margin:0 0 8px">Choose edition</h2>
+  <p style="margin:0 0 12px;color:${test ? "#555" : "red"}">
+    ${
+      test
+        ? "This will send a TEST email to you."
+        : "CAUTION: This will send an email to ALL contacts."
+    }
+  </p>
+  <form id="editionForm">${optionsHtml}
+    <div style="margin-top:16px;display:flex;gap:8px">
+      <button type="submit">Confirm</button>
+      <button type="button" id="cancel">Cancel</button>
+    </div>
+  </form>
+  <p id="status" style="margin-top:12px;color:#555;font-size:13px"></p>
+</div>
+<script>
+  const TEST = ${test ? "true" : "false"};
+  const q = s => document.querySelector(s);
+  q('#cancel').onclick = () => google.script.host.close();
+  q('#editionForm').onsubmit = (e) => {
+    e.preventDefault();
+    const sel = document.querySelector('input[name="edition"]:checked');
+    if (!sel) { alert('Please select an edition.'); return; }
+    const title = sel.value;
+    document.getElementById('status').textContent = TEST ? 'Sending test email…' : 'Sending to all contacts… This could take a while.';
+    google.script.run
+      .withSuccessHandler(() => google.script.host.close())
+      .withFailureHandler(err => alert('Error: ' + (err && err.message ? err.message : err)))
+      ._handleEditionChosen(title, TEST);
+  };
+</script>
+`;
+
+  SpreadsheetApp.getUi().showModalDialog(
+    HtmlService.createHtmlOutput(html),
+    `Inkling • ${title}`,
+  );
+};
+
+const _setSubject = (subject) => {
+  _sheet().getRange(CONFIG.SHEET.SUBJECT_CELL).setValue(subject);
+};
+
+const _handleEditionChosen = (title, test) => {
+  _setSubject(title);
+  _setMsg(`Subject set to “${title}”`);
+  if (test) {
+    _setMsg("Sending test…");
+    sendTestToMe();
+  } else {
+    _setMsg("Sending to all…");
+    sendEmailsFromDoc();
+  }
 };
 
 const _getContacts = () => {
@@ -177,7 +257,12 @@ const _extractEditionSection = (rawHtml, subject) => {
 
 const _getDocId = () => {
   const props = PropertiesService.getScriptProperties();
-  return props.getProperty("DOC_ID");
+  const docId = props.getProperty("DOC_ID");
+  if (!docId) {
+    SpreadsheetApp.getUi().alert("No DOC_ID found in Script Properties.");
+    return;
+  }
+  return docId;
 };
 
 const _neutralizeInlineFonts = (html) => {
@@ -318,8 +403,6 @@ const _articleURL = (subject, relative = false, forNetlify = false) => {
 
 const _sendEmailsFromDoc = (contacts, test = true) => {
   const subject = _getSubject();
-  if (!subject)
-    return _setMsg(`Enter a subject in ${CONFIG.SHEET.SUBJECT_CELL}`, false);
 
   const webAppUrl = _articleURL(subject, false, true);
   _setMsg("Fetching document…");

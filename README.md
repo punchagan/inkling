@@ -17,7 +17,6 @@ to Netlify.
   content/images below it.
 
 - In the **Sheet**:
-  - Set **D2** = that edition title (must exactly match the H1).
   - Fill **A** = Name, **B** = Email (leave **C** for status).
 
 - If you are using Netlify, deploy the site using **Inkling → Deploy site to
@@ -56,7 +55,6 @@ The Sheet will hold:
 - Names (Column **A**)
 - Emails (Column **B**)
 - Email sending status (Column **C**)
-- Subject line (cell **D2**)
 - Script messages (cell **D4**)
 
 ### Attach a script to the Sheet

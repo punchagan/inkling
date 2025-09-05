@@ -13,3 +13,11 @@ const sendEmailsFromDoc = () => {
     return _setMsg("No contacts found (A: Name, B: Email).", false);
   _sendEmailsFromDoc(contacts, false);
 };
+
+const openEditionSelectorTest = () => {
+  _openEditionSelector(true);
+};
+
+const openEditionSelectorAllContacts = () => {
+  _openEditionSelector(false);
+};
