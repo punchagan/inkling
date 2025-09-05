@@ -177,8 +177,8 @@ the Sheet: you should now see the **Inkling** menu at the top.
 
 ## Notes
 
+- Gmail send **limits apply** (approx. 500/day personal, ~2,000/day Workspace;
+  check your account policies).
+
 - `.clasp.json` is **not committed** — each user/contributor has their own
   version of it (created via `clasp clone` or `clasp create`).
-
-- Gmail send limits apply (approx. 500/day personal, ~2,000/day Workspace;
-  check your account policies).
