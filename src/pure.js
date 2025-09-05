@@ -1,10 +1,10 @@
-const _slugify = (s) =>
-  String(s || "")
+const _slugify = (s) => {
+  return String(s || "")
     .toLowerCase()
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
+    .normalize("NFC")
+    .replace(/[^\p{L}\p{N}\p{M}]+/gu, "-")
     .replace(/^-+|-+$/g, "");
+};
 
 if (typeof module !== "undefined") {
   module.exports = {
