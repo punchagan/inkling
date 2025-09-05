@@ -2,6 +2,7 @@ const {
   _ensureName,
   _escapeHtml,
   _isValidEmail,
+  _neutralizeInlineFonts,
   _slugify,
   _stripHtml,
 } = require("../src/pure");
@@ -34,6 +35,20 @@ test("_isValidEmail", () => {
   expect(_isValidEmail("username@domain..com")).toBe(false);
   expect(_isValidEmail("user@domain.com")).toBe(true);
   expect(_isValidEmail("user@domain.co.in")).toBe(true);
+});
+
+test("_neutralizeInlineFonts", () => {
+  const input =
+    '<p style="font-size:16px; font-family:Arial; color:red;">Hello</p>' +
+    '<div style="font-family:Verdana; margin:10px;">World</div>' +
+    '<span style="font-size:12px;">Test font-size:</span>' +
+    "<style>.custom { font-family:Courier; }</style>";
+  const expected =
+    '<p style="color:red">Hello</p>' +
+    '<div style="margin:10px">World</div>' +
+    "<span >Test font-size:</span>" +
+    "";
+  expect(_neutralizeInlineFonts(input)).toBe(expected);
 });
 
 test("_slugify", () => {

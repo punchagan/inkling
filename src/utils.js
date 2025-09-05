@@ -250,22 +250,6 @@ const _getDocId = () => {
   return docId;
 };
 
-const _neutralizeInlineFonts = (html) => {
-  // Remove font-size / font-family from any style="..."
-  html = html.replace(/style="([^"]*)"/gi, (m, styles) => {
-    const cleaned = styles
-      .replace(/(?:^|;)\s*font-size\s*:[^;"]*/gi, "")
-      .replace(/(?:^|;)\s*font-family\s*:[^;"]*/gi, "")
-      .replace(/^\s*;|\s*;$/g, "");
-    return cleaned ? `style="${cleaned}"` : ""; // drop empty style=""
-  });
-
-  // (Optional) strip any <style> blocks that define class-based fonts
-  html = html.replace(/<style[\s\S]*?<\/style>/gi, "");
-
-  return html;
-};
-
 const _prepareInlineImages = (html) => {
   const inlineImages = {};
   let idx = 0;
