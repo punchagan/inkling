@@ -33,12 +33,6 @@ const _setMsg = (msg, ok = true, cell = CONFIG.SHEET.MSG_CELL) =>
 const _getSubject = () =>
   _sheet().getRange(CONFIG.SHEET.SUBJECT_CELL).getValue();
 
-const _escapeHtml = (s) =>
-  String(s).replace(
-    /[&<>"]/g,
-    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c],
-  );
-
 const _getWebAppExecUrl = () => {
   const props = PropertiesService.getScriptProperties();
   const override = props.getProperty("WEBAPP_BASE_URL"); // preferred

@@ -1,5 +1,11 @@
 const _ensureName = (n) => String(n || "").trim() || "there";
 
+const _escapeHtml = (s) =>
+  String(s).replace(
+    /[&<>"]/g,
+    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c],
+  );
+
 const _isValidEmail = (e) => /^[^\s@]+@([^\s@.]+\.)+[^\s@.]+$/.test(e.trim());
 
 const _slugify = (s) => {
@@ -18,6 +24,7 @@ const _stripHtml = (s) =>
 if (typeof module !== "undefined") {
   module.exports = {
     _ensureName,
+    _escapeHtml,
     _isValidEmail,
     _slugify,
     _stripHtml,

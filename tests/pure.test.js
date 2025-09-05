@@ -1,5 +1,6 @@
 const {
   _ensureName,
+  _escapeHtml,
   _isValidEmail,
   _slugify,
   _stripHtml,
@@ -11,6 +12,17 @@ test("_ensureName", () => {
   expect(_ensureName("")).toBe("there");
   expect(_ensureName(null)).toBe("there");
   expect(_ensureName(undefined)).toBe("there");
+});
+
+test("_escapeHtml", () => {
+  expect(_escapeHtml("")).toBe("");
+  expect(_escapeHtml("No special chars")).toBe("No special chars");
+  expect(_escapeHtml("<div>Hello & welcome!</div>")).toBe(
+    "&lt;div&gt;Hello &amp; welcome!&lt;/div&gt;",
+  );
+  expect(_escapeHtml('She said, "Hello!"')).toBe(
+    "She said, &quot;Hello!&quot;",
+  );
 });
 
 test("_isValidEmail", () => {
