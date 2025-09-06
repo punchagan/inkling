@@ -2,6 +2,7 @@ const {
   _composeEmailHtml,
   _ensureName,
   _escapeHtml,
+  _extractEditionSection,
   _isValidEmail,
   _neutralizeInlineFonts,
   _slugify,
@@ -54,6 +55,30 @@ test("_escapeHtml", () => {
   );
   expect(_escapeHtml('She said, "Hello!"')).toBe(
     "She said, &quot;Hello!&quot;",
+  );
+});
+
+test("_extractEditionSection", () => {
+  const rawHtml = `
+    <h2>Footer</h2>
+    <p>This is the footer content.</p>
+    <h1>First Edition</h1>
+    <p>Content of the first edition.</p>
+    <h1>Second Edition</h1>
+    <p>Content of the second edition.</p>
+    <h1>Third Edition</h1>
+    <p>Content of the third edition.</p>
+  `;
+  expect(_extractEditionSection(rawHtml, "Second Edition").trim()).toBe(
+    `<h1>Second Edition</h1>
+    <p>Content of the second edition.</p>`.trim(),
+  );
+  expect(_extractEditionSection(rawHtml, "First Edition").trim()).toBe(
+    `<h1>First Edition</h1>
+    <p>Content of the first edition.</p>`.trim(),
+  );
+  expect(_extractEditionSection(rawHtml, "Nonexistent Edition")).toBe(
+    undefined,
   );
 });
 

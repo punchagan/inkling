@@ -43,6 +43,27 @@ const _escapeHtml = (s) =>
     (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c],
   );
 
+const _extractEditionSection = (rawHtml, subject) => {
+  const norm = (s) => String(s).replace(/\s+/g, " ").trim();
+
+  // Split into chunks beginning at <h1 ...>
+  const parts = rawHtml.split(/(?=<h1\b[^>]*>)/i);
+  if (parts.length === 1) {
+    // No H1s
+    return;
+  }
+
+  for (let i = 1; i < parts.length; i++) {
+    const section = parts[i]; // starts with <h1...>
+    const m = section.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/i);
+    if (!m) continue;
+    const headingText = norm(m[1].replace(/<[^>]+>/g, ""));
+    if (norm(headingText) === norm(subject)) {
+      return section;
+    }
+  }
+};
+
 const _isValidEmail = (e) => /^[^\s@]+@([^\s@.]+\.)+[^\s@.]+$/.test(e.trim());
 
 const _neutralizeInlineFonts = (html) => {
@@ -78,6 +99,7 @@ if (typeof module !== "undefined") {
     _composeEmailHtml,
     _ensureName,
     _escapeHtml,
+    _extractEditionSection,
     _isValidEmail,
     _neutralizeInlineFonts,
     _slugify,

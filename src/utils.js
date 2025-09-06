@@ -207,27 +207,6 @@ const _fetchDocHtml = (docId) => {
   }
 };
 
-const _extractEditionSection = (rawHtml, subject) => {
-  const norm = (s) => String(s).replace(/\s+/g, " ").trim();
-
-  // Split into chunks beginning at <h1 ...>
-  const parts = rawHtml.split(/(?=<h1\b[^>]*>)/i);
-  if (parts.length === 1) {
-    // No H1s
-    return;
-  }
-
-  for (let i = 1; i < parts.length; i++) {
-    const section = parts[i]; // starts with <h1...>
-    const m = section.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/i);
-    if (!m) continue;
-    const headingText = norm(m[1].replace(/<[^>]+>/g, ""));
-    if (norm(headingText) === norm(subject)) {
-      return section;
-    }
-  }
-};
-
 const _getDocId = () => {
   const props = PropertiesService.getScriptProperties();
   const docId = props.getProperty("DOC_ID");
