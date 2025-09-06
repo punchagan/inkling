@@ -20,5 +20,8 @@
   "homepage": "https://github.com/punchagan/inkling#readme",
   "devDependencies": {
     "jest": "^30.1.3"
+  },
+  "dependencies": {
+    "clasp": "^1.0.0"
   }
 }
