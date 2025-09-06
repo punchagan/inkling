@@ -1,4 +1,5 @@
 const {
+  _composeEmailHtml,
   _ensureName,
   _escapeHtml,
   _isValidEmail,
@@ -6,6 +7,36 @@ const {
   _slugify,
   _stripHtml,
 } = require("../src/pure");
+
+test("_composeEmailHtml", () => {
+  const browserUrl = "http://example.com";
+  const banner = '<div style="background:#eee;padding:10px;">Banner</div>';
+  const bodyHtml = "<p>This is the main content of the email.</p>";
+  const greeting = '<div style="margin:10px 0;">Hello Alice,</div>';
+  const fullHtml = `<!doctype html>
+<html>
+  <head><meta charset="utf-8"></head>
+  <body>
+    <div style="font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;color:#555;background:#fafafa;padding:10px 12px;border-bottom:1px solid #eee;">
+           Trouble viewing? <a href="${browserUrl}" target="_blank" rel="noopener">View in browser</a>
+         </div>
+    <div style="font:16px/1.5 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;margin:20px 0;">
+       Hi Alice,
+     </div>
+    ${bodyHtml}
+  </body>
+</html>`;
+  expect(_composeEmailHtml("Alice", bodyHtml, browserUrl)).toBe(fullHtml);
+  expect(_composeEmailHtml("", bodyHtml, browserUrl)).toBe(
+    fullHtml.replace("Alice", "there"),
+  );
+  expect(_composeEmailHtml(null, bodyHtml, browserUrl)).toBe(
+    fullHtml.replace("Alice", "there"),
+  );
+  expect(_composeEmailHtml(" Bob ", bodyHtml, browserUrl)).toBe(
+    fullHtml.replace("Alice", "Bob"),
+  );
+});
 
 test("_ensureName", () => {
   expect(_ensureName("Alice")).toBe("Alice");

@@ -1,15 +1,3 @@
-const CONFIG = {
-  SHEET: {
-    SUBJECT_CELL: "E2", // email subject; must match the edition's H1
-    MSG_CELL: "E4", // status messages from the script
-    SEND_COL: "C", // checkbox to send or skip
-    STATUS_COL: "D", // per-row status writeback
-    CONTACTS_RANGE_START: "A2", // A: Name, B: Email
-  },
-  SHOW_VIEW_IN_BROWSER_BANNER: true,
-  RATE_LIMIT_MS: 1200,
-};
-
 const _errStyle = SpreadsheetApp.newTextStyle()
   .setFontSize(9)
   .setBold(true)
@@ -294,31 +282,6 @@ const _prepareEmailBodyOnce = (editionHtml, footerHtml) => {
   // Remove scripts for email safety
   html = html.replace(/<script[\s\S]*?<\/script>/gi, "");
   return { bodyHtml: html, inlineImages };
-};
-
-const _composeEmailHtml = (name, bodyHtml, browserUrl) => {
-  const safeName = _escapeHtml(_ensureName(name));
-
-  const greeting = `<div style="font:16px/1.5 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;margin:20px 0;">
-       Hi ${safeName},
-     </div>`;
-
-  const banner =
-    CONFIG.SHOW_VIEW_IN_BROWSER_BANNER && browserUrl
-      ? `<div style="font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;color:#555;background:#fafafa;padding:10px 12px;border-bottom:1px solid #eee;">
-           Trouble viewing? <a href="${browserUrl}" target="_blank" rel="noopener">View in browser</a>
-         </div>`
-      : "";
-
-  return `<!doctype html>
-<html>
-  <head><meta charset="utf-8"></head>
-  <body>
-    ${banner}
-    ${greeting}
-    ${bodyHtml}
-  </body>
-</html>`;
 };
 
 const _extractWrappedFooter = (rawHtml) => {
