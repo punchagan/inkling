@@ -2,6 +2,7 @@ const {
   _composeEmailHtml,
   _ensureName,
   _escapeHtml,
+  _extractAllH1Titles,
   _extractEditionSection,
   _isValidEmail,
   _neutralizeInlineFonts,
@@ -56,6 +57,34 @@ test("_escapeHtml", () => {
   expect(_escapeHtml('She said, "Hello!"')).toBe(
     "She said, &quot;Hello!&quot;",
   );
+});
+
+test("_extractAllH1Titles", () => {
+  const rawHtml = `
+    <h2>Footer</h2>
+    <p>This is the footer content.</p>
+    <h1>First Edition</h1>
+    <p>Content of the first edition.</p>
+    <h1>Second Edition</h1>
+    <p>Content of the second edition.</p>
+    <h1>Third Edition</h1>
+    <p>Content of the third edition.</p>
+    <h1>First Edition</h1>
+    <p>Duplicate first edition.</p>
+  `;
+  expect(_extractAllH1Titles(rawHtml)).toEqual([
+    "First Edition",
+    "Second Edition",
+    "Third Edition",
+  ]);
+  expect(_extractAllH1Titles("<p>No H1 here</p>")).toEqual([]);
+  expect(_extractAllH1Titles("")).toEqual([]);
+  expect(_extractAllH1Titles("<h1>  Spaced   Out  </h1>")).toEqual([
+    "Spaced Out",
+  ]);
+  expect(_extractAllH1Titles("<h1>With <em>HTML</em> Tags</h1>")).toEqual([
+    "With HTML Tags",
+  ]);
 });
 
 test("_extractEditionSection", () => {

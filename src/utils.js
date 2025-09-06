@@ -374,24 +374,6 @@ const _sendEmailsFromDoc = (contacts, test = true) => {
   _setMsg(`Done. Sent: ${sent}, Failed: ${failed}`);
 };
 
-const _extractAllH1Titles = (rawHtml) => {
-  // returns an array of clean H1 texts (in Doc order)
-  const titles = [];
-  const re = /<h1\b[^>]*>([\s\S]*?)<\/h1>/gi;
-  let m;
-  while ((m = re.exec(rawHtml)) !== null) {
-    const inner = m[1] || "";
-    const text = inner
-      .replace(/<[^>]+>/g, "")
-      .replace(/\s+/g, " ")
-      .trim();
-    if (text) titles.push(text);
-  }
-  // de-dupe while keeping order
-  const seen = new Set();
-  return titles.filter((t) => (seen.has(t) ? false : (seen.add(t), true)));
-};
-
 const _archiveListHtml = (titles, pageTitle, forNetlify) => {
   if (!titles || titles.length === 0) {
     return `<p>No editions found (no <code>Heading 1</code> in the Doc).</p>`;
