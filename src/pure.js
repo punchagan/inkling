@@ -133,6 +133,11 @@ const _neutralizeInlineFonts = (html) => {
   return html.replace(/<style[\s\S]*?<\/style>/gi, "");
 };
 
+const _sha1Hex = (bytes) => {
+  const dig = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_1, bytes);
+  return dig.map((b) => ("0" + (b & 0xff).toString(16)).slice(-2)).join("");
+};
+
 const _slugify = (s) => {
   return String(s || "")
     .toLowerCase()
@@ -156,6 +161,7 @@ if (typeof module !== "undefined") {
     _extractEditionSection,
     _isValidEmail,
     _neutralizeInlineFonts,
+    _sha1Hex,
     _slugify,
     _stripHtml,
   };

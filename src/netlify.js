@@ -1,8 +1,3 @@
-const _sha1Hex = (bytes) => {
-  const dig = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_1, bytes);
-  return dig.map((b) => ("0" + (b & 0xff).toString(16)).slice(-2)).join("");
-};
-
 const _inlineImagesAsDataUris = (html) => {
   return html.replace(/<img\b[^>]*src=["']([^"']+)["'][^>]*>/gi, (m, src) => {
     try {
