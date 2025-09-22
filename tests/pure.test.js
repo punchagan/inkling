@@ -142,6 +142,9 @@ test("_slugify", () => {
   expect(_slugify("  Leading and trailing  ")).toBe("leading-and-trailing");
   expect(_slugify("తెలుగు వికీపీడియా")).toBe("తెలుగు-వికీపీడియా");
   expect(_slugify("中文 测试")).toBe("中文-测试");
+  expect(_slugify("&#10024; Edition 1 &mdash; Curiosities of the World")).toBe(
+    "edition-1-curiosities-of-the-world",
+  );
 });
 
 test("_stripHtml", () => {

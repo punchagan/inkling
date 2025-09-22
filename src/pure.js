@@ -138,8 +138,51 @@ const _sha1Hex = (bytes) => {
   return dig.map((b) => ("0" + (b & 0xff).toString(16)).slice(-2)).join("");
 };
 
+// Minimal entity map for common named entities you might see in Docs/HTML exports
+const _HTML_ENTITIES = {
+  amp: "&",
+  lt: "<",
+  gt: ">",
+  quot: '"',
+  apos: "'",
+  nbsp: " ", // treat NBSP as a space
+  ensp: " ",
+  emsp: " ",
+  ndash: "–",
+  mdash: "—",
+  hellip: "…",
+  lsquo: "‘",
+  rsquo: "’",
+  ldquo: "“",
+  rdquo: "”",
+};
+
+const _decodeHtmlEntities = (s) =>
+  String(s || "")
+    // numeric decimal: &#10024;
+    .replace(/&#(\d+);/g, (_, d) => {
+      try {
+        return String.fromCodePoint(Number(d));
+      } catch {
+        return _;
+      }
+    })
+    // numeric hex: &#x2014; or &#X2014;
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, h) => {
+      try {
+        return String.fromCodePoint(parseInt(h, 16));
+      } catch {
+        return _;
+      }
+    })
+    // named: &mdash; &nbsp; etc.
+    .replace(
+      /&([a-zA-Z][a-zA-Z0-9]+);/g,
+      (m, name) => _HTML_ENTITIES[name.toLowerCase()] ?? m,
+    );
+
 const _slugify = (s) => {
-  return String(s || "")
+  return _decodeHtmlEntities(s)
     .toLowerCase()
     .normalize("NFC")
     .replace(/[^\p{L}\p{N}\p{M}]+/gu, "-")
