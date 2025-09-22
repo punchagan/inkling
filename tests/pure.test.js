@@ -63,19 +63,19 @@ test("_extractAllH1Titles", () => {
   const rawHtml = `
     <h2>Footer</h2>
     <p>This is the footer content.</p>
-    <h1>First Edition</h1>
+    <h1>&#10024; Edition 1 &mdash; Curiosities of the World</h1>
     <p>Content of the first edition.</p>
-    <h1>Second Edition</h1>
+    <h1>&#127775; Edition 2 &mdash; Odd Histories &amp; Lists</h1>
     <p>Content of the second edition.</p>
-    <h1>Third Edition</h1>
+    <h1>&#128221; Edition 3 &mdash; Short &amp; Sweet</h1>
     <p>Content of the third edition.</p>
-    <h1>First Edition</h1>
+    <h1>&#10024; Edition 1 &mdash; Curiosities of the World</h1>
     <p>Duplicate first edition.</p>
   `;
   expect(_extractAllH1Titles(rawHtml)).toEqual([
-    "First Edition",
-    "Second Edition",
-    "Third Edition",
+    "✨ Edition 1 — Curiosities of the World",
+    "🌟 Edition 2 — Odd Histories & Lists",
+    "📝 Edition 3 — Short & Sweet",
   ]);
   expect(_extractAllH1Titles("<p>No H1 here</p>")).toEqual([]);
   expect(_extractAllH1Titles("")).toEqual([]);
@@ -91,19 +91,29 @@ test("_extractEditionSection", () => {
   const rawHtml = `
     <h2>Footer</h2>
     <p>This is the footer content.</p>
-    <h1>First Edition</h1>
+    <h1>&#10024; Edition 1 &mdash; Curiosities of the World</h1>
     <p>Content of the first edition.</p>
-    <h1>Second Edition</h1>
+    <h1>&#127775; Edition 2 &mdash; Odd Histories &amp; Lists</h1>
     <p>Content of the second edition.</p>
-    <h1>Third Edition</h1>
+    <h1>&#128221; Edition 3 &mdash; Short &amp; Sweet</h1>
     <p>Content of the third edition.</p>
   `;
-  expect(_extractEditionSection(rawHtml, "Second Edition").trim()).toBe(
-    `<h1>Second Edition</h1>
+  expect(
+    _extractEditionSection(
+      rawHtml,
+      "🌟 Edition 2 — Odd Histories & Lists",
+    ).trim(),
+  ).toBe(
+    `<h1>&#127775; Edition 2 &mdash; Odd Histories &amp; Lists</h1>
     <p>Content of the second edition.</p>`.trim(),
   );
-  expect(_extractEditionSection(rawHtml, "First Edition").trim()).toBe(
-    `<h1>First Edition</h1>
+  expect(
+    _extractEditionSection(
+      rawHtml,
+      "✨ Edition 1 — Curiosities of the World",
+    )?.trim(),
+  ).toBe(
+    `<h1>&#10024; Edition 1 &mdash; Curiosities of the World</h1>
     <p>Content of the first edition.</p>`.trim(),
   );
   expect(_extractEditionSection(rawHtml, "Nonexistent Edition")).toBe(

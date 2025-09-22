@@ -88,7 +88,7 @@ const _extractAllH1Titles = (rawHtml) => {
       .replace(/<[^>]+>/g, "")
       .replace(/\s+/g, " ")
       .trim();
-    if (text) titles.push(text);
+    if (text) titles.push(_decodeHtmlEntities(text));
   }
   // de-dupe while keeping order
   const seen = new Set();
@@ -96,8 +96,6 @@ const _extractAllH1Titles = (rawHtml) => {
 };
 
 const _extractEditionSection = (rawHtml, subject) => {
-  const norm = (s) => String(s).replace(/\s+/g, " ").trim();
-
   // Split into chunks beginning at <h1 ...>
   const parts = rawHtml.split(/(?=<h1\b[^>]*>)/i);
   if (parts.length === 1) {
@@ -105,12 +103,14 @@ const _extractEditionSection = (rawHtml, subject) => {
     return;
   }
 
+  const subjectSlug = _slugify(subject);
+
   for (let i = 1; i < parts.length; i++) {
     const section = parts[i]; // starts with <h1...>
     const m = section.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/i);
     if (!m) continue;
-    const headingText = norm(m[1].replace(/<[^>]+>/g, ""));
-    if (norm(headingText) === norm(subject)) {
+    const sectionSlug = _slugify(_stripHtml(m[1]));
+    if (sectionSlug === subjectSlug) {
       return section;
     }
   }
