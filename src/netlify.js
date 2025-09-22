@@ -55,6 +55,8 @@ const _buildSiteFiles = () => {
 
   const files = [];
 
+  console.log(`Building site with ${titles.length} editions`);
+
   // Per-edition pages
   titles.forEach((title) => {
     const section = _extractEditionSection(raw, title);
@@ -129,6 +131,7 @@ const deployToNetlify = () => {
       { contentType: f.mime || "application/octet-stream", payload: f.bytes },
     );
     // No error means OK; Netlify ignores re-uploads of known blobs.
+    console.log(`Uploaded ${f.path} (${f.bytes.length} bytes)`);
   });
 
   // 5) (Optional) Poll deploy until state === 'ready' (usually fast)
