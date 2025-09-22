@@ -46,7 +46,7 @@ This section is for writers who just want to use Inkling without installing
 - You can add a footer to be included in all the emails and the web pages, by
   adding a **Heading 2** with the text **Footer**, before the first **Heading
   1** entry.
-- You can start by creating a copy of this [sample document], if you prefer
+- You can start by creating a copy of this [sample document], if you like
 
 [sample document]: https://docs.google.com/document/d/1kgCmkiNCAKmBgc7aK2e_M-AGWNf3nzOUMFt62Tnd6wg/edit?usp=sharing
 
@@ -59,6 +59,9 @@ The Sheet will hold:
   skipping an email.
 - Email sending status (Column **D**)
 - Script messages (cell **E4**)
+- You can start by copying this [sample spreadsheet], if you like
+
+[sample spreadsheet]: https://docs.google.com/spreadsheets/d/1PSPL_fuiFrTXmgqjQZH36B0WnC-UnNKPQBIBXS8oJ_c/edit?gid=0#gid=0
 
 ### Attach a script to the Sheet
 
