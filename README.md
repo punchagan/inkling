@@ -46,9 +46,11 @@ This section is for writers who just want to use Inkling without installing
 - You can add a footer to be included in all the emails and the web pages, by
   adding a **Heading 2** with the text **Footer**, before the first **Heading
   1** entry.
-- You can start by creating a copy of this [sample document], if you like
+- You can start by creating a copy of this [sample document], if you like. (A deployment of this sample document is available [here])
 
 [sample document]: https://docs.google.com/document/d/1kgCmkiNCAKmBgc7aK2e_M-AGWNf3nzOUMFt62Tnd6wg/edit?usp=sharing
+
+[here]: https://inkling-demo.netlify.app
 
 ### Create a Google Sheet
 
@@ -116,7 +118,7 @@ API to Netlify.
 - Create a Personal Access Token
   - Netlify UI → User settings → Applications → Personal access tokens → New token.
   - Add the token as `NETLIFY_TOKEN` in your Script properties
-- Add your netlify site URL as `NETLIFY_URL` script property (e.g. https://YOUR-SITE.netlify.app)
+- Add your netlify site URL as `NETLIFY_URL` script property (e.g. https://inkling-demo.netlify.app)
 
 ### Script Properties
 
