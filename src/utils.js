@@ -398,10 +398,10 @@ const _buildIndexHtml = (
   forNetlify = false,
 ) => {
   const titles = _extractAllH1Titles(rawDocHtml);
-  const contentHtml = _archiveListHtml(titles, webAppTitle, forNetlify);
+  let contentHtml = _archiveListHtml(titles, webAppTitle, forNetlify);
   if (subject) {
     const subject_ = `“${_escapeHtml(subject)}”`;
-    const prefix = `<p style="color:#b00">Couldn’t find ${subject_}".</p>`;
+    const prefix = `<p style="color:#b00;margin:0 0 12px">Couldn’t find ${subject_}.</p>`;
     contentHtml = `${prefix}\n${contentHtml}`;
   }
   return contentHtml;
