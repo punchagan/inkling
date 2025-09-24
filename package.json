@@ -4,7 +4,9 @@
   "description": "Inkling is a tiny toolkit to publish a personal newsletter using Google's tools.",
   "main": "index.js",
   "scripts": {
-    "test": "jest --runInBand"
+    "test": "jest --runInBand",
+    "push": "npm run test && clasp push",
+    "redeploy": "npm run push && clasp redeploy $(clasp list-deployments | tail -n 1 | cut -d ' ' -f 2)"
   },
   "repository": {
     "type": "git",
