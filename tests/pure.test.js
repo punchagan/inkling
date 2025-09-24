@@ -5,7 +5,7 @@ const {
   _extractAllH1Titles,
   _extractEditionSection,
   _isValidEmail,
-  _neutralizeInlineFonts,
+  _sanitizeDocHtml,
   _slugify,
   _stripHtml,
 } = require("../src/pure");
@@ -17,16 +17,24 @@ test("_composeEmailHtml", () => {
   const greeting = '<div style="margin:10px 0;">Hello Alice,</div>';
   const fullHtml = `<!doctype html>
 <html>
-  <head><meta charset="utf-8"></head>
-  <body>
-    <div style="font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;color:#555;background:#fafafa;padding:10px 12px;border-bottom:1px solid #eee;">
-           Trouble viewing? <a href="${browserUrl}" target="_blank" rel="noopener">View in browser</a>
-         </div>
-    <div style="font:16px/1.5 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;margin:20px 0;">
-       Hi Alice,
-     </div>
-    ${bodyHtml}
-  </body>
+<body style="margin:0;padding:0;background:#ffffff;color:#111111;font:16px/1.5 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial">
+  <div style="max-width:640px;margin:0 auto;padding:20px">
+    <div style="margin-top:18px">
+      <p style="margin:0 0 12px">Hi Alice,</p>
+      <p>This is the main content of the email.</p>
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:16px 0">
+         <tr>
+           <td align="center" bgcolor="#0b66ff" style="border-radius:8px">
+             <a href="http://example.com" target="_blank" rel="noopener"
+                style="display:inline-block;padding:12px 16px;font:bold 14px/1.2 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;color:#ffffff;text-decoration:none;border-radius:8px">
+               Read on the web →
+             </a>
+           </td>
+         </tr>
+       </table>
+    </div>
+  </div>
+</body>
 </html>`;
   expect(_composeEmailHtml("Alice", bodyHtml, browserUrl)).toBe(fullHtml);
   expect(_composeEmailHtml("", bodyHtml, browserUrl)).toBe(
@@ -132,18 +140,18 @@ test("_isValidEmail", () => {
   expect(_isValidEmail("user@domain.co.in")).toBe(true);
 });
 
-test("_neutralizeInlineFonts", () => {
+test("_sanitizeDocHtml", () => {
   const input =
-    '<p style="font-size:16px; font-family:Arial; color:red;">Hello</p>' +
+    '<p style="font-size:16px; font-family:Arial; color:red; display:block">Hello</p>' +
     '<div style="font-family:Verdana; margin:10px;">World</div>' +
     '<span style="font-size:12px;">Test font-size:</span>' +
     "<style>.custom { font-family:Courier; }</style>";
   const expected =
-    '<p style="color:red">Hello</p>' +
+    '<p style="display:block">Hello</p>' +
     '<div style="margin:10px">World</div>' +
     "<span >Test font-size:</span>" +
     "";
-  expect(_neutralizeInlineFonts(input)).toBe(expected);
+  expect(_sanitizeDocHtml(input)).toBe(expected);
 });
 
 test("_slugify", () => {

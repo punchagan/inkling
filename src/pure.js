@@ -11,33 +11,54 @@ const CONFIG = {
 };
 
 const _buildWebHtml = (
+  webAppTitle,
   title,
   contentHtml,
   footerHtml,
   baseUrl = "",
   iframe = false,
 ) => {
-  const html = `
-<!doctype html>
-<html>
+  const pageTitle = webAppTitle !== title ? `${title} — ${webAppTitle}` : title;
+  const html = `<!doctype html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   ${iframe ? `<base href="${baseUrl}" target="_top">` : ""}
-  <title>${_escapeHtml(title)}</title>
+  <title>${_escapeHtml(pageTitle)}</title>
   <style>
-    :root{--fg:#111;--muted:#666;--max:780px}
-    body{font:16px/1.6 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial;margin:24px;color:var(--fg);background:#fff}
-    .wrap{max-width:var(--max);margin:0 auto}
-    .doc{background:#fff}
+    :root{--bg:#fff;--fg:#111;--muted:#666;--link:#0b66ff;--card:#fafafa;--max:760px;--code:#f6f8fa;--border:#eee}
+    @media (prefers-color-scheme: dark){
+      :root{--bg:#0b0d10;--fg:#e7eaee;--muted:#96a0ab;--link:#7ab0ff;--card:#0f1318;--code:#0f141a;--border:#1c222b}
+    }
+    body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+    .wrap{max-width:var(--max);margin:0 auto;padding:24px 16px 56px}
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+    .brand{font-weight:700}
+    .doc h1{font-size:1.9rem;line-height:1.2;margin:.2em 0 .6em}
+    .doc h2{font-size:1.45rem;line-height:1.3;margin:1.4em 0 .6em}
+    .doc h3{font-size:1.18rem;line-height:1.3;margin:1.1em 0 .5em}
+    .doc p{margin:.75em 0}
+    .doc a{color:var(--link)}
+    .doc ol,.doc ul{padding-left:1.2em}
+    .doc li{margin:.25em 0}
+    .doc hr{border:0;border-top:1px solid var(--border);margin:1.5rem 0}
+    .doc blockquote{margin:1em 0;padding:.6em .9em;border-left:3px solid var(--border);background:var(--card);border-radius:10px}
+    .doc pre,.doc code,.doc kbd{font:.92rem/1.5 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace}
+    .doc pre{background:var(--code);border:1px solid var(--border);padding:12px;border-radius:12px;overflow:auto}
+    .doc img{max-width:100%;height:auto;border-radius:10px}
+    .footer{margin-top:28px;font-size:.95rem;color:var(--muted)}
   </style>
 </head>
 <body>
   <div class="wrap">
-    <div class="doc">${contentHtml}</div>
-    <div class="footer" style="margin-top:48px;color:var(--muted);font-size:14px;line-height:1.4">
-      ${footerHtml}
-    </div>
+    <header><div class="brand"><a href="/">${_escapeHtml(
+      webAppTitle,
+    )}</a></div></header>
+    <main class="doc">
+      ${contentHtml}
+      ${footerHtml ? `<div class="footer">${footerHtml}</div>` : ""}
+    </main>
   </div>
 </body>
 </html>`;
@@ -46,26 +67,31 @@ const _buildWebHtml = (
 
 const _composeEmailHtml = (name, bodyHtml, browserUrl) => {
   const safeName = _escapeHtml(_ensureName(name));
-
-  const greeting = `<div style="font:16px/1.5 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;margin:20px 0;">
-       Hi ${safeName},
-     </div>`;
-
-  const banner =
-    CONFIG.SHOW_VIEW_IN_BROWSER_BANNER && browserUrl
-      ? `<div style="font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;color:#555;background:#fafafa;padding:10px 12px;border-bottom:1px solid #eee;">
-           Trouble viewing? <a href="${browserUrl}" target="_blank" rel="noopener">View in browser</a>
-         </div>`
-      : "";
+  const greeting = `<p style="margin:0 0 12px">Hi ${safeName},</p>`;
+  const button = browserUrl
+    ? `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:16px 0">
+         <tr>
+           <td align="center" bgcolor="#0b66ff" style="border-radius:8px">
+             <a href="${browserUrl}" target="_blank" rel="noopener"
+                style="display:inline-block;padding:12px 16px;font:bold 14px/1.2 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;color:#ffffff;text-decoration:none;border-radius:8px">
+               Read on the web →
+             </a>
+           </td>
+         </tr>
+       </table>`
+    : "";
 
   return `<!doctype html>
 <html>
-  <head><meta charset="utf-8"></head>
-  <body>
-    ${banner}
-    ${greeting}
-    ${bodyHtml}
-  </body>
+<body style="margin:0;padding:0;background:#ffffff;color:#111111;font:16px/1.5 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial">
+  <div style="max-width:640px;margin:0 auto;padding:20px">
+    <div style="margin-top:18px">
+      ${greeting}
+      ${bodyHtml}
+      ${button}
+    </div>
+  </div>
+</body>
 </html>`;
 };
 
@@ -118,7 +144,33 @@ const _extractEditionSection = (rawHtml, subject) => {
 
 const _isValidEmail = (e) => /^[^\s@]+@([^\s@.]+\.)+[^\s@.]+$/.test(e.trim());
 
-const _neutralizeInlineFonts = (html) => {
+// Remove noisy Google Docs inline styles / unsafe attrs; keep structure.
+const _sanitizeDocHtml = (html) => {
+  if (!html) return "";
+  // Drop script/style/meta/link tags
+  html = String(html)
+    .replace(/<(script|style|meta|link)\b[\s\S]*?<\/\1>/gi, "")
+    .replace(/<(script|style|meta|link)\b[^>]*>/gi, "");
+  // Remove on* handlers and data-* attributes
+  html = html
+    .replace(/\son[a-z]+="[^"]*"/gi, "")
+    .replace(/\sdata-[\w-]+="[^"]*"/gi, "");
+  // Strip font/color/background from style=""
+  html = html.replace(
+    /\sstyle="[^"]*?(font-(family|size)|color|background)[^"]*"/gi,
+    (m) => {
+      const kept = m
+        .replace(/(font-(family|size)|color|background)\s*:[^;"]*;?/gi, "")
+        .trim();
+      return kept ? ` ${kept}` : "";
+    },
+  );
+  // Normalize empties & convert <p><strong>…</strong></p> → <h3>…</h3>
+  html = html
+    .replace(/<(p|div|span)[^>]*>\s*<\/\1>/gi, "")
+    .replace(/<p>\s*<strong>(.*?)<\/strong>\s*<\/p>/gi, "<h3>$1</h3>")
+    .replace(/\u00A0/g, " "); // NBSP → space
+
   // Remove font-size / font-family from any style="..."
   html = html.replace(/style="([^"]*)"/gi, (m, styles) => {
     const cleaned = styles
@@ -128,9 +180,7 @@ const _neutralizeInlineFonts = (html) => {
       .trim();
     return cleaned ? `style="${cleaned}"` : ""; // drop empty style=""
   });
-
-  // (Optional) strip any <style> blocks that define class-based fonts
-  return html.replace(/<style[\s\S]*?<\/style>/gi, "");
+  return html.trim();
 };
 
 const _sha1Hex = (bytes) => {
@@ -203,7 +253,7 @@ if (typeof module !== "undefined") {
     _extractAllH1Titles,
     _extractEditionSection,
     _isValidEmail,
-    _neutralizeInlineFonts,
+    _sanitizeDocHtml,
     _sha1Hex,
     _slugify,
     _stripHtml,

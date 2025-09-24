@@ -256,9 +256,10 @@ const _prepareInlineImages = (html) => {
 };
 
 const _prepareEmailBodyOnce = (editionHtml, footerHtml) => {
+  editionHtml = _sanitizeDocHtml(editionHtml);
+  footerHtml = _sanitizeDocHtml(footerHtml);
   let fullHtml = `${editionHtml}\n${footerHtml}`;
   let { html, inlineImages } = _prepareInlineImages(fullHtml);
-  // Remove scripts for email safety
   html = html.replace(/<script[\s\S]*?<\/script>/gi, "");
   return { bodyHtml: html, inlineImages };
 };
@@ -282,13 +283,11 @@ const _extractWrappedFooter = (rawHtml) => {
         .trim()
         .toLowerCase();
       if (text === "footer") {
-        // Strip off the <h2>Footer</h2> itself and return the rest
-        const footer = _neutralizeInlineFonts(
-          section.replace(/<h2\b[^>]*>[\s\S]*?<\/h2>/i, "").trim(),
-        );
-        return `<div style="font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;padding:10px 12px;border-top:1px solid #eee;margin-top:24px;">
-                   ${footer}
-                </div>`;
+        const footerRaw = section
+          .replace(/<h2\b[^>]*>[\s\S]*?<\/h2>/i, "")
+          .trim();
+        const footer = _sanitizeDocHtml(footerRaw);
+        return `<div style="font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;padding:10px 12px;border-top:1px solid #eee;margin-top:24px;">${footer}</div>`;
       }
     }
   }

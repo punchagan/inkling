@@ -62,7 +62,7 @@ const _buildSiteFiles = () => {
     const section = _extractEditionSection(raw, title);
     if (!section) return;
     const page = _inlineImagesAsDataUris(
-      _buildWebHtml(title, section, footerHtml),
+      _buildWebHtml(webAppTitle, title, section, footerHtml),
     );
     const slug = _slugify(title);
     const bytes = Utilities.newBlob(page, "text/html").getBytes();
@@ -76,7 +76,7 @@ const _buildSiteFiles = () => {
   // Archive page
   const archive = _buildIndexHtml(raw, webAppTitle, null, true);
   const page = _inlineImagesAsDataUris(
-    _buildWebHtml(webAppTitle, archive, footerHtml),
+    _buildWebHtml(webAppTitle, webAppTitle, archive, footerHtml),
   );
   files.push({
     path: "index.html",
