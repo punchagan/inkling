@@ -311,6 +311,82 @@ const _articleURL = (subject, relative = false, forNetlify = false) => {
   return webAppUrl;
 };
 
+// RFC 2047 "encoded-word" for UTF-8 Subject
+const _encodeRFC2047 = (s) => {
+  const utf8 = Utilities.newBlob(String(s ?? "").normalize("NFC")).getBytes();
+  const b64 = Utilities.base64Encode(utf8);
+  return `=?UTF-8?B?${b64}?=`;
+};
+
+// Wrap base64 to 76 chars per MIME (safer across clients)
+const _wrap76 = (s) => s.replace(/.{1,76}/g, "$&\r\n");
+
+// Build a MIME message with multipart/related (html+inline images) and multipart/alternative (text/html)
+const _buildMimeMessage = ({ to, subject, html, text, inlineImages }) => {
+  const boundaryRel = "rel_" + Utilities.getUuid();
+  const boundaryAlt = "alt_" + Utilities.getUuid();
+
+  const headers = [
+    `To: ${to}`,
+    `Subject: ${_encodeRFC2047(subject)}`,
+    `MIME-Version: 1.0`,
+    `Content-Type: multipart/related; boundary="${boundaryRel}"`,
+  ].join("\r\n");
+
+  const textPart = [
+    `--${boundaryRel}`,
+    `Content-Type: multipart/alternative; boundary="${boundaryAlt}"`,
+    ``,
+    `--${boundaryAlt}`,
+    `Content-Type: text/plain; charset="UTF-8"`,
+    `Content-Transfer-Encoding: base64`,
+    ``,
+    _wrap76(Utilities.base64Encode(text || _stripHtml(html || ""))),
+    `--${boundaryAlt}`,
+    `Content-Type: text/html; charset="UTF-8"`,
+    `Content-Transfer-Encoding: base64`,
+    ``,
+    _wrap76(Utilities.base64Encode(html || "")),
+    `--${boundaryAlt}--`,
+  ].join("\r\n");
+
+  const imageParts = [];
+  if (inlineImages) {
+    Object.keys(inlineImages).forEach((cid) => {
+      const blob = inlineImages[cid];
+      const mime = blob.getContentType() || "application/octet-stream";
+      const ext = mime.split("/")[1] || "bin";
+      imageParts.push(
+        [
+          `--${boundaryRel}`,
+          `Content-Type: ${mime}`,
+          `Content-Transfer-Encoding: base64`,
+          `Content-ID: <${cid}>`,
+          `Content-Disposition: inline; filename="${cid}.${ext}"`,
+          ``,
+          _wrap76(Utilities.base64Encode(blob.getBytes())),
+        ].join("\r\n"),
+      );
+    });
+  }
+
+  const closing = `--${boundaryRel}--`;
+
+  return `${headers}\r\n\r\n${textPart}\r\n${imageParts.join(
+    "\r\n",
+  )}\r\n${closing}`;
+};
+
+// Send via Gmail Advanced Service
+const _sendEmailAdvanced = ({ to, subject, html, text, inlineImages }) => {
+  const mime = _buildMimeMessage({ to, subject, html, text, inlineImages });
+  const raw = Utilities.base64EncodeWebSafe(
+    mime,
+    Utilities.Charset.UTF_8,
+  ).replace(/=+$/, "");
+  Gmail.Users.Messages.send({ raw }, "me");
+};
+
 const _sendEmailsFromDoc = (contacts, test = true) => {
   const subject = _getSubject();
 
@@ -353,12 +429,17 @@ const _sendEmailsFromDoc = (contacts, test = true) => {
     const personalizedHtml = _composeEmailHtml(name, bodyHtml, webAppUrl);
 
     try {
-      GmailApp.sendEmail(
-        email,
-        emailSubject,
-        _stripHtml(personalizedHtml), // plain-text fallback
-        { htmlBody: personalizedHtml, inlineImages },
-      );
+      // Build per-recipient HTML you already have
+      const personalizedHtml = _composeEmailHtml(name, bodyHtml, webAppUrl);
+
+      _sendEmailAdvanced({
+        to: email,
+        subject: emailSubject, // keep your existing variable
+        html: personalizedHtml, // includes your header/button/footer
+        text: _stripHtml(personalizedHtml),
+        inlineImages, // from _prepareEmailBodyOnce (cid:imgX)
+      });
+
       _setMsg(`Sent ${new Date().toLocaleString()}`, true, statusCell);
       sent++;
     } catch (e) {
