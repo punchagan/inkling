@@ -7,6 +7,8 @@ const doGet = (e) => {
   const webAppTitle = Drive.Files.get(docId).name || "Newsletter";
   let contentHtml;
 
+  let pageStyle = _extractPageStyle(rawDocHtml);
+
   if (subject) {
     contentHtml = _extractEditionSection(rawDocHtml, subject);
   }
@@ -19,6 +21,7 @@ const doGet = (e) => {
   const footerHtml = _extractWrappedFooter(rawDocHtml);
   const html = _buildWebHtml(
     pageTitleText,
+    pageStyle,
     contentHtml,
     footerHtml,
     execBase,

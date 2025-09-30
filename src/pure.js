@@ -13,6 +13,7 @@ const CONFIG = {
 const _buildWebHtml = (
   webAppTitle,
   title,
+  extraStyle,
   contentHtml,
   footerHtml,
   baseUrl = "",
@@ -48,6 +49,9 @@ const _buildWebHtml = (
     .doc pre{background:var(--code);border:1px solid var(--border);padding:12px;border-radius:12px;overflow:auto}
     .doc img{max-width:100%;height:auto;border-radius:10px}
     .footer{margin-top:28px;font-size:.95rem;color:var(--muted)}
+  </style>
+  <style>
+    ${extraStyle}
   </style>
 </head>
 <body>
@@ -102,6 +106,22 @@ const _escapeHtml = (s) =>
     /[&<>"]/g,
     (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c],
   );
+
+const _extractPageStyle = (rawHtml) => {
+  // Extract <style>…</style> from the <head></head>, if any
+  const m = rawHtml.match(/<head\b[^>]*>([\s\S]*?)<\/head>/i);
+  if (m) {
+    const head = m[1];
+    const styles = [];
+    const re = /<style\b[^>]*>([\s\S]*?)<\/style>/gi;
+    let sm;
+    while ((sm = re.exec(head)) !== null) {
+      if (sm[1]) styles.push(sm[1].trim());
+    }
+    if (styles.length) return styles.join("\n");
+  }
+  return "";
+};
 
 const _extractAllH1Titles = (rawHtml) => {
   // returns an array of clean H1 texts (in Doc order)

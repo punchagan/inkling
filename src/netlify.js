@@ -60,9 +60,10 @@ const _buildSiteFiles = () => {
   // Per-edition pages
   titles.forEach((title) => {
     const section = _extractEditionSection(raw, title);
+    const extraStyle = _extractPageStyle(raw);
     if (!section) return;
     const page = _inlineImagesAsDataUris(
-      _buildWebHtml(webAppTitle, title, section, footerHtml),
+      _buildWebHtml(webAppTitle, title, extraStyle, section, footerHtml),
     );
     const slug = _slugify(title);
     const bytes = Utilities.newBlob(page, "text/html").getBytes();
@@ -76,7 +77,7 @@ const _buildSiteFiles = () => {
   // Archive page
   const archive = _buildIndexHtml(raw, webAppTitle, null, true);
   const page = _inlineImagesAsDataUris(
-    _buildWebHtml(webAppTitle, webAppTitle, archive, footerHtml),
+    _buildWebHtml(webAppTitle, webAppTitle, "", archive, footerHtml),
   );
   files.push({
     path: "index.html",
