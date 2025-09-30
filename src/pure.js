@@ -78,7 +78,7 @@ const _composeEmailHtml = (name, bodyHtml, browserUrl) => {
            <td align="center" bgcolor="#0b66ff" style="border-radius:8px">
              <a href="${browserUrl}" target="_blank" rel="noopener"
                 style="display:inline-block;padding:12px 16px;font:bold 14px/1.2 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;color:#ffffff;text-decoration:none;border-radius:8px">
-               Read on the web →
+               Trouble reading the email? Read on the web!
              </a>
            </td>
          </tr>
@@ -90,9 +90,9 @@ const _composeEmailHtml = (name, bodyHtml, browserUrl) => {
 <body style="margin:0;padding:0;background:#ffffff;color:#111111;font:16px/1.5 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial">
   <div style="max-width:640px;margin:0 auto;padding:20px">
     <div style="margin-top:18px">
+      ${button}
       ${greeting}
       ${bodyHtml}
-      ${button}
     </div>
   </div>
 </body>
