@@ -256,7 +256,6 @@ const _prepareInlineImages = (html) => {
 };
 
 const _prepareEmailBodyOnce = (editionHtml, footerHtml) => {
-  editionHtml = _sanitizeDocHtml(editionHtml);
   footerHtml = _sanitizeDocHtml(footerHtml);
   let fullHtml = `${editionHtml}\n${footerHtml}`;
   let { html, inlineImages } = _prepareInlineImages(fullHtml);
