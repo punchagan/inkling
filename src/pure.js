@@ -28,10 +28,7 @@ const _buildWebHtml = (
   ${iframe ? `<base href="${baseUrl}" target="_top">` : ""}
   <title>${_escapeHtml(pageTitle)}</title>
   <style>
-    :root{--bg:#fff;--fg:#111;--muted:#666;--link:#0b66ff;--card:#fafafa;--max:760px;--code:#f6f8fa;--border:#eee}
-    @media (prefers-color-scheme: dark){
-      :root{--bg:#0b0d10;--fg:#e7eaee;--muted:#96a0ab;--link:#7ab0ff;--card:#0f1318;--code:#0f141a;--border:#1c222b}
-    }
+    :root{--muted:#666;--link:#0b66ff;--card:#fafafa;--max:760px;--code:#f6f8fa;--border:#eee}
     body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
     .wrap{max-width:var(--max);margin:0 auto;padding:24px 16px 56px}
     header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
