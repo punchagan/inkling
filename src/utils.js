@@ -60,7 +60,9 @@ const _openSourceDocDialog = () => {
 };
 
 const _openEditionSelector = (test) => {
-  const titles = _extractAllH1Titles(_fetchDocHtml(_getDocId()));
+  const titles = _extractAllH1Titles(
+    HTMLParser.parse(_fetchDocHtml(_getDocId())),
+  );
   if (!titles.length) {
     SpreadsheetApp.getUi().alert(
       "No editions found (no Heading 1 in the Doc).",
@@ -450,7 +452,7 @@ const _buildIndexHtml = (
   subject = null,
   forNetlify = false,
 ) => {
-  const titles = _extractAllH1Titles(rawDocHtml);
+  const titles = _extractAllH1Titles(HTMLParser.parse(rawDocHtml));
   let contentHtml = _archiveListHtml(titles, webAppTitle, forNetlify);
   if (subject) {
     const subject_ = `“${_escapeHtml(subject)}”`;

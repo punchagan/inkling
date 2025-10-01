@@ -121,19 +121,14 @@ const _extractPageStyle = (rawHtml) => {
   return "";
 };
 
-const _extractAllH1Titles = (rawHtml) => {
+const _extractAllH1Titles = (parsedHtml) => {
   // returns an array of clean H1 texts (in Doc order)
-  const titles = [];
-  const re = /<h1\b[^>]*>([\s\S]*?)<\/h1>/gi;
-  let m;
-  while ((m = re.exec(rawHtml)) !== null) {
-    const inner = m[1] || "";
-    const text = inner
-      .replace(/<[^>]+>/g, "")
-      .replace(/\s+/g, " ")
-      .trim();
-    if (text) titles.push(_decodeHtmlEntities(text));
-  }
+  if (!parsedHtml) return [];
+
+  const titles = parsedHtml
+    .querySelectorAll("h1")
+    .map((h1) => h1.textContent.replace(/\s+/g, " ").trim());
+
   // de-dupe while keeping order
   const seen = new Set();
   return titles.filter((t) => (seen.has(t) ? false : (seen.add(t), true)));

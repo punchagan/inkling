@@ -11,6 +11,9 @@ const {
   _stripHtml,
 } = require("../src/pure");
 
+const HTMLParser = require("node-html-parser");
+global.HTMLParser = HTMLParser;
+
 test("_composeEmailHtml", () => {
   const browserUrl = "http://example.com";
   const banner = '<div style="background:#eee;padding:10px;">Banner</div>';
@@ -74,6 +77,7 @@ test("_escapeHtml", () => {
 
 test("_extractAllH1Titles", () => {
   const rawHtml = `
+    <div>
     <h2>Footer</h2>
     <p>This is the footer content.</p>
     <h1>&#10024; Edition 1 &mdash; Curiosities of the World</h1>
@@ -84,20 +88,23 @@ test("_extractAllH1Titles", () => {
     <p>Content of the third edition.</p>
     <h1>&#10024; Edition 1 &mdash; Curiosities of the World</h1>
     <p>Duplicate first edition.</p>
+    </div>
   `;
-  expect(_extractAllH1Titles(rawHtml)).toEqual([
+  expect(_extractAllH1Titles(HTMLParser.parse(rawHtml))).toEqual([
     "✨ Edition 1 — Curiosities of the World",
     "🌟 Edition 2 — Odd Histories & Lists",
     "📝 Edition 3 — Short & Sweet",
   ]);
-  expect(_extractAllH1Titles("<p>No H1 here</p>")).toEqual([]);
-  expect(_extractAllH1Titles("")).toEqual([]);
-  expect(_extractAllH1Titles("<h1>  Spaced   Out  </h1>")).toEqual([
-    "Spaced Out",
-  ]);
-  expect(_extractAllH1Titles("<h1>With <em>HTML</em> Tags</h1>")).toEqual([
-    "With HTML Tags",
-  ]);
+  expect(_extractAllH1Titles(HTMLParser.parse("<p>No H1 here</p>"))).toEqual(
+    [],
+  );
+  expect(_extractAllH1Titles(HTMLParser.parse(""))).toEqual([]);
+  expect(
+    _extractAllH1Titles(HTMLParser.parse("<h1>  Spaced   Out  </h1>")),
+  ).toEqual(["Spaced Out"]);
+  expect(
+    _extractAllH1Titles(HTMLParser.parse("<h1>With <em>HTML</em> Tags</h1>")),
+  ).toEqual(["With HTML Tags"]);
 });
 
 test("_extractEditionSection", () => {
