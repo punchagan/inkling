@@ -50,7 +50,7 @@ const _buildSiteFiles = () => {
   const docId = _getDocId();
   const raw = _fetchDocHtml(docId);
   const parsed = HTMLParser.parse(raw);
-  const footerHtml = _extractWrappedFooter(raw);
+  const footerHtml = _extractWrappedFooter(parsed);
   const titles = _extractAllH1Titles(parsed);
   const webAppTitle = Drive.Files.get(docId).name || "Newsletter";
 

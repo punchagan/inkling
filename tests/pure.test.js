@@ -144,20 +144,26 @@ test("_extractEditionSection", () => {
 
 test("_extractIntro", () => {
   const rawHtml = `
+    <div>
     <h2>Footer</h2>
     <p>This is the footer content.</p>
-    <h2>Intro</h2>
+    <h2 id="h.ywau5bqjlnjr">
+      <span style="color:#000000">Intro</span>
+    </h2>
     <p>Welcome to our newsletter!</p>
     <h1>Edition 1</h1>
     <p>Content of the first edition.</p>
     <h1>Edition 2</h1>
     <p>Content of the second edition.</p>
+    </div>
   `;
-  expect(_extractIntro(rawHtml).trim()).toBe(
+  expect(_extractIntro(HTMLParser.parse(rawHtml.trim())).trim()).toBe(
     `<p>Welcome to our newsletter!</p>`.trim(),
   );
-  expect(_extractIntro("<h1>No Intro Here</h1>")).toBe("");
-  expect(_extractIntro("<h2>Not Greeting</h2><p>Some text</p>")).toBe("");
+  expect(_extractIntro(HTMLParser.parse("<h1>No Intro Here</h1>"))).toBe("");
+  expect(
+    _extractIntro(HTMLParser.parse("<h2>Not Intro</h2><p>Some text</p>")),
+  ).toBe("");
 });
 
 test("_extractPageStyle", () => {

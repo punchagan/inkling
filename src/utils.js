@@ -373,8 +373,8 @@ const _sendEmailsFromDoc = (contacts, test = true) => {
     );
 
   // 1) Prepare body ONCE (inline images etc.)
-  const introHtml = _extractIntro(rawDocHtml);
-  const footerHtml = _extractWrappedFooter(rawDocHtml);
+  const introHtml = _extractIntro(parsedHtml);
+  const footerHtml = _extractWrappedFooter(parsedHtml);
   const { bodyHtml, inlineImages } = _prepareEmailBodyOnce(
     editionHtml,
     footerHtml,

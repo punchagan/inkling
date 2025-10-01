@@ -14,7 +14,7 @@ test("_buildWebHtml", () => {
   const parsed = HTMLParser.parse(rawHtml);
   const section = _extractEditionSection(parsed, "Curiosities of the World");
   expect(section).toBeDefined();
-  const footerHtml = _extractWrappedFooter(rawHtml);
+  const footerHtml = _extractWrappedFooter(parsed);
   const extraStyle = _extractPageStyle(parsed);
   const html = _buildWebHtml(
     "My Newsletter",

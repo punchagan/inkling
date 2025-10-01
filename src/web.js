@@ -19,7 +19,7 @@ const doGet = (e) => {
   const pageTitleText = subject
     ? `${subject} — ${webAppTitle}`
     : `${webAppTitle} — Archive`;
-  const footerHtml = _extractWrappedFooter(rawDocHtml);
+  const footerHtml = _extractWrappedFooter(parsedHtml);
   const html = _buildWebHtml(
     pageTitleText,
     pageStyle,

@@ -148,34 +148,44 @@ const _extractEditionSection = (parsedHtml, subject) => {
   return pieces.join("");
 };
 
-const _extractIntro = (rawHtml) => {
-  // greeting is a <h2>Intro</h2> before the first <h1/>. If none, empty.
-  const parts = rawHtml.split(/(?=<h1\b[^>]*>)/i);
-  if (parts.length === 0) return "";
-  const beforeFirstH1 = parts[0];
-  const partsH2 = beforeFirstH1.split(/(?=<h2\b[^>]*>)/i);
-  if (partsH2.length === 0) return "";
-  // Look for a <h2>Greeting</h2>
-  for (let i = 1; i < partsH2.length; i++) {
-    const section = partsH2[i]; // starts with <h2...>
-    const m = section.match(/<h2\b[^>]*>([\s\S]*?)<\/h2>/i);
-    if (m) {
-      const inner = m[1] || "";
-      const text = inner
-        .replace(/<[^>]+>/g, "")
-        .replace(/\s+/g, " ")
-        .trim()
-        .toLowerCase();
-      if (text === "intro") {
-        const greetingRaw = section
-          .replace(/<h2\b[^>]*>[\s\S]*?<\/h2>/i, "")
-          .trim();
-        return _sanitizeDocHtml(greetingRaw);
-      }
+const _extractH2 = (parsedHtml, text) => {
+  // intro is a <h2>Intro</h2> before the first <h1/>. If none, empty.
+
+  const firstH1 = parsedHtml.querySelector("h1");
+
+  let prefixHtml = "";
+  if (!firstH1) {
+    prefixHtml = parsedHtml.toString();
+  } else {
+    const parent = firstH1.parentNode;
+    const beforeNodes = [];
+    for (const node of parent.childNodes) {
+      if (firstH1 && node === firstH1) break;
+      beforeNodes.push(node);
     }
+    if (beforeNodes.length === 0) return "";
+    prefixHtml = beforeNodes.map((n) => n.toString()).join("");
   }
-  return "";
+
+  const prefixRoot = HTMLParser.parse(prefixHtml);
+  let n = prefixRoot.querySelectorAll("h2").find((h2) => {
+    const h2Text = h2.textContent.trim().toLowerCase();
+    return h2Text === text.toLowerCase();
+  });
+  if (!n) return "";
+
+  const pieces = [];
+  n = n.nextElementSibling;
+  while (n) {
+    if (n.tagName && n.tagName.toLowerCase() === "h2") break;
+    pieces.push(n.toString());
+    n = n.nextElementSibling;
+  }
+  const html = pieces.join("").trim();
+  return html !== "" ? _sanitizeDocHtml(html) : "";
 };
+
+const _extractIntro = (parsedHtml) => _extractH2(parsedHtml, "Intro");
 
 const _extractPageStyle = (parsedHtml) => {
   // Extract <style>…</style> from the <head></head>, if any
@@ -189,34 +199,11 @@ const _extractPageStyle = (parsedHtml) => {
   return styles.map((s) => s.textContent.trim()).join("\n");
 };
 
-const _extractWrappedFooter = (rawHtml) => {
+const _extractWrappedFooter = (parsedHtml) => {
   // footer is a <h2>Footer</h2> before the first <h1/>. If none, empty.
-  const parts = rawHtml.split(/(?=<h1\b[^>]*>)/i);
-  if (parts.length === 0) return "";
-  const beforeFirstH1 = parts[0];
-  const partsH2 = beforeFirstH1.split(/(?=<h2\b[^>]*>)/i);
-  if (partsH2.length === 0) return "";
-  // Look for a <h2>Footer</h2>
-  for (let i = 1; i < partsH2.length; i++) {
-    const section = partsH2[i]; // starts with <h2...>
-    const m = section.match(/<h2\b[^>]*>([\s\S]*?)<\/h2>/i);
-    if (m) {
-      const inner = m[1] || "";
-      const text = inner
-        .replace(/<[^>]+>/g, "")
-        .replace(/\s+/g, " ")
-        .trim()
-        .toLowerCase();
-      if (text === "footer") {
-        const footerRaw = section
-          .replace(/<h2\b[^>]*>[\s\S]*?<\/h2>/i, "")
-          .trim();
-        const footer = _sanitizeDocHtml(footerRaw);
-        return `<div style="font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;padding:10px 12px;border-top:1px solid #eee;margin-top:24px;">${footer}</div>`;
-      }
-    }
-  }
-  return "";
+  const footer = _extractH2(parsedHtml, "Footer");
+  if (!footer || footer === "") return "";
+  return `<div style="font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;padding:10px 12px;border-top:1px solid #eee;margin-top:24px;">${footer}</div>`;
 };
 
 const _isValidEmail = (e) => /^[^\s@]+@([^\s@.]+\.)+[^\s@.]+$/.test(e.trim());
