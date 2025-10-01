@@ -425,8 +425,6 @@ const _sendEmailsFromDoc = (contacts, test = true) => {
     }
 
     // 2) Compose per-recipient FINAL HTML (adds greeting/banner/footer)
-    const personalizedHtml = _composeEmailHtml(name, bodyHtml, webAppUrl);
-
     try {
       // Build per-recipient HTML you already have
       const personalizedHtml = _composeEmailHtml(name, bodyHtml, webAppUrl);
