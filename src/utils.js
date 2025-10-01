@@ -400,6 +400,7 @@ const _sendEmailsFromDoc = (contacts, test = true) => {
     );
 
   // 1) Prepare body ONCE (inline images etc.)
+  const introHtml = _extractIntro(rawDocHtml);
   const footerHtml = _extractWrappedFooter(rawDocHtml);
   const { bodyHtml, inlineImages } = _prepareEmailBodyOnce(
     editionHtml,
@@ -427,7 +428,12 @@ const _sendEmailsFromDoc = (contacts, test = true) => {
     // 2) Compose per-recipient FINAL HTML (adds greeting/banner/footer)
     try {
       // Build per-recipient HTML you already have
-      const personalizedHtml = _composeEmailHtml(name, bodyHtml, webAppUrl);
+      const personalizedHtml = _composeEmailHtml(
+        name,
+        introHtml,
+        bodyHtml,
+        webAppUrl,
+      );
 
       _sendEmailAdvanced({
         to: email,

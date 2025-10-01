@@ -4,6 +4,7 @@ const {
   _escapeHtml,
   _extractAllH1Titles,
   _extractEditionSection,
+  _extractIntro,
   _isValidEmail,
   _sanitizeDocHtml,
   _slugify,
@@ -15,6 +16,7 @@ test("_composeEmailHtml", () => {
   const banner = '<div style="background:#eee;padding:10px;">Banner</div>';
   const bodyHtml = "<p>This is the main content of the email.</p>";
   const greeting = '<div style="margin:10px 0;">Hello Alice,</div>';
+  const intro = '<div style="margin:10px 0;">Intro text here.</div>';
   const fullHtml = `<!doctype html>
 <html>
 <body style="margin:0;padding:0;background:#ffffff;color:#111111;font:16px/1.5 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial">
@@ -31,19 +33,22 @@ test("_composeEmailHtml", () => {
          </tr>
        </table>
       <p style="margin:0 0 12px">Hi Alice,</p>
+      <div style="margin:10px 0;">Intro text here.</div>
       <p>This is the main content of the email.</p>
     </div>
   </div>
 </body>
 </html>`;
-  expect(_composeEmailHtml("Alice", bodyHtml, browserUrl)).toBe(fullHtml);
-  expect(_composeEmailHtml("", bodyHtml, browserUrl)).toBe(
+  expect(_composeEmailHtml("Alice", intro, bodyHtml, browserUrl)).toBe(
+    fullHtml,
+  );
+  expect(_composeEmailHtml("", intro, bodyHtml, browserUrl)).toBe(
     fullHtml.replace("Alice", "there"),
   );
-  expect(_composeEmailHtml(null, bodyHtml, browserUrl)).toBe(
+  expect(_composeEmailHtml(null, intro, bodyHtml, browserUrl)).toBe(
     fullHtml.replace("Alice", "there"),
   );
-  expect(_composeEmailHtml(" Bob ", bodyHtml, browserUrl)).toBe(
+  expect(_composeEmailHtml(" Bob ", intro, bodyHtml, browserUrl)).toBe(
     fullHtml.replace("Alice", "Bob"),
   );
 });
@@ -127,6 +132,24 @@ test("_extractEditionSection", () => {
   expect(_extractEditionSection(rawHtml, "Nonexistent Edition")).toBe(
     undefined,
   );
+});
+
+test("_extractIntro", () => {
+  const rawHtml = `
+    <h2>Footer</h2>
+    <p>This is the footer content.</p>
+    <h2>Intro</h2>
+    <p>Welcome to our newsletter!</p>
+    <h1>Edition 1</h1>
+    <p>Content of the first edition.</p>
+    <h1>Edition 2</h1>
+    <p>Content of the second edition.</p>
+  `;
+  expect(_extractIntro(rawHtml).trim()).toBe(
+    `<p>Welcome to our newsletter!</p>`.trim(),
+  );
+  expect(_extractIntro("<h1>No Intro Here</h1>")).toBe("");
+  expect(_extractIntro("<h2>Not Greeting</h2><p>Some text</p>")).toBe("");
 });
 
 test("_isValidEmail", () => {
