@@ -191,3 +191,32 @@ the Sheet: you should now see the **Inkling** menu at the top.
 
 - `.clasp.json` is **not committed** — each user/contributor has their own
   version of it (created via `clasp clone` or `clasp create`).
+
+## AI Transparency
+
+This project was developed with significant AI assistance (ChatGPT by Open AI).
+The core architecture and design grew out of some hackish script I had put
+together in the past, but extensive refactoring, feature additions, etc., were
+performed using AI-assisted development.
+
+While the tool has been tested and works well in practice, users should be aware that:
+
+- **Technical implications**: AI-generated code may have unique patterns or
+  subtle issues. We've tested Inkling on real newsletters, but thorough testing
+  is always recommended.
+
+- **Legal uncertainty**: The copyright status and liability for AI-generated
+  code remain legally untested. The original codebase provides a foundation,
+  but AI contributions cannot be easily traced to specific training data.
+
+- **Practical use**: Despite these unknowns, Inkling provides useful
+  functionality for managing a tiny personal newsletter+site and is actively
+  maintained.
+
+By using this tool, you acknowledge these uncertainties. As with any
+development tool: use version control, review generated newsletters+site, and
+test thoroughly.
+
+## LICENSE
+
+GNU AGPL v3
