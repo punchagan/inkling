@@ -364,7 +364,8 @@ const _sendEmailsFromDoc = (contacts, test = true) => {
   const webAppUrl = _articleURL(subject, false, true);
   _setMsg("Fetching document…");
   const rawDocHtml = _fetchDocHtml(_getDocId());
-  const editionHtml = _extractEditionSection(rawDocHtml, subject);
+  const parsedHtml = HTMLParser.parse(rawDocHtml);
+  const editionHtml = _extractEditionSection(parsedHtml, subject);
   if (!editionHtml)
     return _setMsg(
       `Could not find any Heading 1 with the text: ${subject}`,

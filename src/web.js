@@ -1,6 +1,7 @@
 const doGet = (e) => {
   const docId = _getDocId();
   const rawDocHtml = _fetchDocHtml(docId);
+  const parsedHtml = HTMLParser.parse(rawDocHtml);
   const subjectParam = e && e.parameter && e.parameter.subject;
   const subject = subjectParam ? String(subjectParam).trim() : "";
   const execBase = _getWebAppExecUrl();
@@ -10,7 +11,7 @@ const doGet = (e) => {
   let pageStyle = _extractPageStyle(rawDocHtml);
 
   if (subject) {
-    contentHtml = _extractEditionSection(rawDocHtml, subject);
+    contentHtml = _extractEditionSection(parsedHtml, subject);
   }
   if (!contentHtml) {
     contentHtml = _buildIndexHtml(rawDocHtml, webAppTitle, subject);

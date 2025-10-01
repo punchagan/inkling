@@ -109,6 +109,7 @@ test("_extractAllH1Titles", () => {
 
 test("_extractEditionSection", () => {
   const rawHtml = `
+    <div>
     <h2>Footer</h2>
     <p>This is the footer content.</p>
     <h1>&#10024; Edition 1 &mdash; Curiosities of the World</h1>
@@ -117,28 +118,27 @@ test("_extractEditionSection", () => {
     <p>Content of the second edition.</p>
     <h1>&#128221; Edition 3 &mdash; Short &amp; Sweet</h1>
     <p>Content of the third edition.</p>
+    </div>
   `;
   expect(
     _extractEditionSection(
-      rawHtml,
+      HTMLParser.parse(rawHtml),
       "🌟 Edition 2 — Odd Histories & Lists",
     ).trim(),
   ).toBe(
-    `<h1>&#127775; Edition 2 &mdash; Odd Histories &amp; Lists</h1>
-    <p>Content of the second edition.</p>`.trim(),
+    `<h1>&#127775; Edition 2 &mdash; Odd Histories &amp; Lists</h1><p>Content of the second edition.</p>`.trim(),
   );
   expect(
     _extractEditionSection(
-      rawHtml,
+      HTMLParser.parse(rawHtml),
       "✨ Edition 1 — Curiosities of the World",
     )?.trim(),
   ).toBe(
-    `<h1>&#10024; Edition 1 &mdash; Curiosities of the World</h1>
-    <p>Content of the first edition.</p>`.trim(),
+    `<h1>&#10024; Edition 1 &mdash; Curiosities of the World</h1><p>Content of the first edition.</p>`.trim(),
   );
-  expect(_extractEditionSection(rawHtml, "Nonexistent Edition")).toBe(
-    undefined,
-  );
+  expect(
+    _extractEditionSection(HTMLParser.parse(rawHtml), "Nonexistent Edition"),
+  ).toBe(undefined);
 });
 
 test("_extractIntro", () => {

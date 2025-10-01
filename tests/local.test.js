@@ -5,11 +5,14 @@ const {
   _buildWebHtml,
 } = require("../src/pure");
 const fs = require("fs");
+const HTMLParser = require("node-html-parser");
+global.HTMLParser = HTMLParser;
 
 test("_buildWebHtml", () => {
   const currDir = __dirname;
   const rawHtml = fs.readFileSync(currDir + "/fixtures/raw.html", "utf8");
-  const section = _extractEditionSection(rawHtml, "Curiosities of the World");
+  const parsed = HTMLParser.parse(rawHtml);
+  const section = _extractEditionSection(parsed, "Curiosities of the World");
   expect(section).toBeDefined();
   const footerHtml = _extractWrappedFooter(rawHtml);
   const extraStyle = _extractPageStyle(rawHtml);

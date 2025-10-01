@@ -49,8 +49,9 @@ const _netlifyApi = (method, path, payloadObj, extra) => {
 const _buildSiteFiles = () => {
   const docId = _getDocId();
   const raw = _fetchDocHtml(docId);
+  const parsed = HTMLParser.parse(raw);
   const footerHtml = _extractWrappedFooter(raw);
-  const titles = _extractAllH1Titles(HTMLParser.parse(raw));
+  const titles = _extractAllH1Titles(parsed);
   const webAppTitle = Drive.Files.get(docId).name || "Newsletter";
 
   const files = [];
@@ -59,7 +60,7 @@ const _buildSiteFiles = () => {
 
   // Per-edition pages
   titles.forEach((title) => {
-    const section = _extractEditionSection(raw, title);
+    const section = _extractEditionSection(parsed, title);
     const extraStyle = _extractPageStyle(raw);
     if (!section) return;
     const page = _inlineImagesAsDataUris(

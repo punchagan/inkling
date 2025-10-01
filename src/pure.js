@@ -134,25 +134,34 @@ const _extractAllH1Titles = (parsedHtml) => {
   return titles.filter((t) => (seen.has(t) ? false : (seen.add(t), true)));
 };
 
-const _extractEditionSection = (rawHtml, subject) => {
-  // Split into chunks beginning at <h1 ...>
-  const parts = rawHtml.split(/(?=<h1\b[^>]*>)/i);
-  if (parts.length === 1) {
-    // No H1s
-    return;
-  }
+const _extractEditionSection = (parsedHtml, subject) => {
+  if (!parsedHtml) return undefined;
 
-  const subjectSlug = _slugify(subject);
+  const targetSlug = _slugify(subject);
+  const h1s = parsedHtml.querySelectorAll("h1");
+  if (!h1s.length) return undefined;
 
-  for (let i = 1; i < parts.length; i++) {
-    const section = parts[i]; // starts with <h1...>
-    const m = section.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/i);
-    if (!m) continue;
-    const sectionSlug = _slugify(_stripHtml(m[1]));
-    if (sectionSlug === subjectSlug) {
-      return section;
+  // 1) find the <h1> whose slug matches
+  let startH1 = null;
+  for (const h of h1s) {
+    const text = h.textContent.replace(/\s+/g, " ").trim();
+    const slug = _slugify(text);
+    if (slug === targetSlug) {
+      startH1 = h;
+      break;
     }
   }
+  if (!startH1) return undefined;
+
+  // 2) collect this <h1> and subsequent siblings until the next <h1>
+  const pieces = [];
+  let n = startH1;
+  while (n) {
+    pieces.push(n.toString());
+    n = n.nextElementSibling;
+    if (n && n.tagName && n.tagName.toLowerCase() === "h1") break;
+  }
+  return pieces.join("");
 };
 
 const _extractIntro = (rawHtml) => {
