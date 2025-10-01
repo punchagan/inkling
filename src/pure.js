@@ -105,22 +105,6 @@ const _escapeHtml = (s) =>
     (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c],
   );
 
-const _extractPageStyle = (rawHtml) => {
-  // Extract <style>…</style> from the <head></head>, if any
-  const m = rawHtml.match(/<head\b[^>]*>([\s\S]*?)<\/head>/i);
-  if (m) {
-    const head = m[1];
-    const styles = [];
-    const re = /<style\b[^>]*>([\s\S]*?)<\/style>/gi;
-    let sm;
-    while ((sm = re.exec(head)) !== null) {
-      if (sm[1]) styles.push(sm[1].trim());
-    }
-    if (styles.length) return styles.join("\n");
-  }
-  return "";
-};
-
 const _extractAllH1Titles = (parsedHtml) => {
   // returns an array of clean H1 texts (in Doc order)
   if (!parsedHtml) return [];
@@ -191,6 +175,18 @@ const _extractIntro = (rawHtml) => {
     }
   }
   return "";
+};
+
+const _extractPageStyle = (parsedHtml) => {
+  // Extract <style>…</style> from the <head></head>, if any
+
+  if (!parsedHtml) return "";
+  const head = parsedHtml.querySelector("head");
+  if (!head) return "";
+
+  const styles = head.querySelectorAll("style");
+  if (!styles.length) return "";
+  return styles.map((s) => s.textContent.trim()).join("\n");
 };
 
 const _extractWrappedFooter = (rawHtml) => {

@@ -61,7 +61,7 @@ const _buildSiteFiles = () => {
   // Per-edition pages
   titles.forEach((title) => {
     const section = _extractEditionSection(parsed, title);
-    const extraStyle = _extractPageStyle(raw);
+    const extraStyle = _extractPageStyle(parsed);
     if (!section) return;
     const page = _inlineImagesAsDataUris(
       _buildWebHtml(webAppTitle, title, extraStyle, section, footerHtml),

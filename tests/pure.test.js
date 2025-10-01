@@ -5,6 +5,7 @@ const {
   _extractAllH1Titles,
   _extractEditionSection,
   _extractIntro,
+  _extractPageStyle,
   _isValidEmail,
   _sanitizeDocHtml,
   _slugify,
@@ -157,6 +158,34 @@ test("_extractIntro", () => {
   );
   expect(_extractIntro("<h1>No Intro Here</h1>")).toBe("");
   expect(_extractIntro("<h2>Not Greeting</h2><p>Some text</p>")).toBe("");
+});
+
+test("_extractPageStyle", () => {
+  const rawHtml = `
+    <html>
+    <head>
+    <style>
+      body { font-family: Arial, sans-serif; color: #333; }
+      h1 { color: #0073e6; }
+    </style>
+    </head>
+    <body>
+      <style>
+        p { line-height: 1.6; }
+      </style>
+      <h1>Edition 1</h1>
+    </body>
+    </html>`;
+  const parsed = HTMLParser.parse(rawHtml);
+  const expectedStyle = `
+      body { font-family: Arial, sans-serif; color: #333; }
+      h1 { color: #0073e6; }`;
+  expect(_extractPageStyle(parsed).trim()).toBe(expectedStyle.trim());
+  expect(
+    _extractPageStyle(
+      HTMLParser.parse("<html><head></head><body></body></html>"),
+    ),
+  ).toBe("");
 });
 
 test("_isValidEmail", () => {
