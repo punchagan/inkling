@@ -141,6 +141,11 @@ const _extractEditionSection = (parsedHtml, subject) => {
   }
   if (!startH1) return undefined;
 
+  // If the body has a width in pt, set image widths as % of that width to make
+  // page responsive
+  const bodyWidth = _getBodyWidth(parsedHtml);
+  if (bodyWidth) _setImageWidths(parsedHtml, bodyWidth);
+
   // 2) collect this <h1> and subsequent siblings until the next <h1>
   const pieces = [];
   let n = startH1;
@@ -210,6 +215,23 @@ const _extractWrappedFooter = (parsedHtml) => {
   return `<div style="font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;padding:10px 12px;border-top:1px solid #eee;margin-top:24px;">${footer}</div>`;
 };
 
+const _getBodyWidth = (parsedHtml) => {
+  if (!parsedHtml) return undefined;
+  const body = parsedHtml.querySelector("body");
+  if (!body) return undefined;
+  const style = body.getAttribute("style") || "";
+  const widthPt = _getValueFromStyle(style, "width", "pt");
+  if (widthPt) {
+    return widthPt * 1.3333; // pt to px
+  }
+};
+
+const _getValueFromStyle = (style, key, unit) => {
+  const regex = new RegExp(`${key}:\\s*([0-9.]+)${unit}`, "i");
+  const match = style.match(regex);
+  return match ? parseFloat(match[1].trim(), 10) : null;
+};
+
 const _isValidEmail = (e) => /^[^\s@]+@([^\s@.]+\.)+[^\s@.]+$/.test(e.trim());
 
 // Remove noisy Google Docs inline styles / unsafe attrs; keep structure.
@@ -249,6 +271,36 @@ const _sanitizeDocHtml = (html) => {
     return cleaned ? `style="${cleaned}"` : ""; // drop empty style=""
   });
   return html.trim();
+};
+
+const _setImageWidths = (parsedHtml, bodyWidth) => {
+  // Set image widths as % of body width, removing any px-based width/height
+  // from the image and its parent.
+
+  if (!parsedHtml) return;
+  const images = parsedHtml.querySelectorAll("img");
+  images.forEach((img) => {
+    const style = img.getAttribute("style") || "";
+    const width = _getValueFromStyle(style, "width", "px");
+    const widthPercent = Math.min((width / bodyWidth) * 100, 100);
+
+    // Remove any existing width and height in px
+    let newStyle = style
+      .replace(/width:\s*[0-9.]+px;?/gi, "")
+      .replace(/height:\s*[0-9.]+px;?/gi, "")
+      .trim();
+    img.setAttribute("style", newStyle);
+
+    const parent = img.parentNode;
+    const parentStyle = parent.getAttribute("style") || "";
+    let newParentStyle = parentStyle
+      .replace(/width:\s*[0-9.]+px;?/gi, "")
+      .replace(/height:\s*[0-9.]+px;?/gi, "")
+      .trim();
+
+    newParentStyle += `;width:${widthPercent.toFixed(2)}%`;
+    parent.setAttribute("style", newParentStyle);
+  });
 };
 
 const _sha1Hex = (bytes) => {
