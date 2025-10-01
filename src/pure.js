@@ -121,35 +121,6 @@ const _extractPageStyle = (rawHtml) => {
   return "";
 };
 
-const _extractIntro = (rawHtml) => {
-  // greeting is a <h2>Intro</h2> before the first <h1/>. If none, empty.
-  const parts = rawHtml.split(/(?=<h1\b[^>]*>)/i);
-  if (parts.length === 0) return "";
-  const beforeFirstH1 = parts[0];
-  const partsH2 = beforeFirstH1.split(/(?=<h2\b[^>]*>)/i);
-  if (partsH2.length === 0) return "";
-  // Look for a <h2>Greeting</h2>
-  for (let i = 1; i < partsH2.length; i++) {
-    const section = partsH2[i]; // starts with <h2...>
-    const m = section.match(/<h2\b[^>]*>([\s\S]*?)<\/h2>/i);
-    if (m) {
-      const inner = m[1] || "";
-      const text = inner
-        .replace(/<[^>]+>/g, "")
-        .replace(/\s+/g, " ")
-        .trim()
-        .toLowerCase();
-      if (text === "intro") {
-        const greetingRaw = section
-          .replace(/<h2\b[^>]*>[\s\S]*?<\/h2>/i, "")
-          .trim();
-        return _sanitizeDocHtml(greetingRaw);
-      }
-    }
-  }
-  return "";
-};
-
 const _extractAllH1Titles = (rawHtml) => {
   // returns an array of clean H1 texts (in Doc order)
   const titles = [];
@@ -187,6 +158,65 @@ const _extractEditionSection = (rawHtml, subject) => {
       return section;
     }
   }
+};
+
+const _extractIntro = (rawHtml) => {
+  // greeting is a <h2>Intro</h2> before the first <h1/>. If none, empty.
+  const parts = rawHtml.split(/(?=<h1\b[^>]*>)/i);
+  if (parts.length === 0) return "";
+  const beforeFirstH1 = parts[0];
+  const partsH2 = beforeFirstH1.split(/(?=<h2\b[^>]*>)/i);
+  if (partsH2.length === 0) return "";
+  // Look for a <h2>Greeting</h2>
+  for (let i = 1; i < partsH2.length; i++) {
+    const section = partsH2[i]; // starts with <h2...>
+    const m = section.match(/<h2\b[^>]*>([\s\S]*?)<\/h2>/i);
+    if (m) {
+      const inner = m[1] || "";
+      const text = inner
+        .replace(/<[^>]+>/g, "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .toLowerCase();
+      if (text === "intro") {
+        const greetingRaw = section
+          .replace(/<h2\b[^>]*>[\s\S]*?<\/h2>/i, "")
+          .trim();
+        return _sanitizeDocHtml(greetingRaw);
+      }
+    }
+  }
+  return "";
+};
+
+const _extractWrappedFooter = (rawHtml) => {
+  // footer is a <h2>Footer</h2> before the first <h1/>. If none, empty.
+  const parts = rawHtml.split(/(?=<h1\b[^>]*>)/i);
+  if (parts.length === 0) return "";
+  const beforeFirstH1 = parts[0];
+  const partsH2 = beforeFirstH1.split(/(?=<h2\b[^>]*>)/i);
+  if (partsH2.length === 0) return "";
+  // Look for a <h2>Footer</h2>
+  for (let i = 1; i < partsH2.length; i++) {
+    const section = partsH2[i]; // starts with <h2...>
+    const m = section.match(/<h2\b[^>]*>([\s\S]*?)<\/h2>/i);
+    if (m) {
+      const inner = m[1] || "";
+      const text = inner
+        .replace(/<[^>]+>/g, "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .toLowerCase();
+      if (text === "footer") {
+        const footerRaw = section
+          .replace(/<h2\b[^>]*>[\s\S]*?<\/h2>/i, "")
+          .trim();
+        const footer = _sanitizeDocHtml(footerRaw);
+        return `<div style="font:12px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;padding:10px 12px;border-top:1px solid #eee;margin-top:24px;">${footer}</div>`;
+      }
+    }
+  }
+  return "";
 };
 
 const _isValidEmail = (e) => /^[^\s@]+@([^\s@.]+\.)+[^\s@.]+$/.test(e.trim());
@@ -300,6 +330,8 @@ if (typeof module !== "undefined") {
     _extractAllH1Titles,
     _extractEditionSection,
     _extractIntro,
+    _extractPageStyle,
+    _extractWrappedFooter,
     _isValidEmail,
     _sanitizeDocHtml,
     _sha1Hex,
