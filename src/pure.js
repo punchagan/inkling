@@ -115,7 +115,11 @@ const _extractAllH1Titles = (parsedHtml) => {
 
   // de-dupe while keeping order
   const seen = new Set();
-  return titles.filter((t) => (seen.has(t) ? false : (seen.add(t), true)));
+  return titles.filter((t) => {
+    if (t === "" || !t || seen.has(t)) return false;
+    seen.add(t);
+    return true;
+  });
 };
 
 const _extractEditionSection = (parsedHtml, subject) => {
