@@ -46,7 +46,11 @@ This section is for writers who just want to use Inkling without installing
 - You can add a footer to be included in all the emails and the web pages, by
   adding a **Heading 2** with the text **Footer**, before the first **Heading
   1** entry.
-- You can start by creating a copy of this [sample document], if you like. (A deployment of this sample document is available [here])
+- You can add an intro to be included after the "Hello <name>" greeting in the
+  email by adding a **Heading 2** with the text **Intro**, before the first
+  **Heading 1** entry.
+- You can start by creating a copy of this [sample document], if you like. (A
+  deployment of this sample document is available [here])
 
 [sample document]: https://docs.google.com/document/d/1kgCmkiNCAKmBgc7aK2e_M-AGWNf3nzOUMFt62Tnd6wg/edit?usp=sharing
 
