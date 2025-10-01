@@ -48,8 +48,7 @@ const _netlifyApi = (method, path, payloadObj, extra) => {
 
 const _buildSiteFiles = () => {
   const docId = _getDocId();
-  const raw = _fetchDocHtml(docId);
-  const parsed = HTMLParser.parse(raw);
+  const parsed = HTMLParser.parse(_fetchDocHtml(docId));
   const footerHtml = _extractWrappedFooter(parsed);
   const titles = _extractAllH1Titles(parsed);
   const webAppTitle = Drive.Files.get(docId).name || "Newsletter";
@@ -76,7 +75,7 @@ const _buildSiteFiles = () => {
   });
 
   // Archive page
-  const archive = _buildIndexHtml(raw, webAppTitle, null, true);
+  const archive = _buildIndexHtml(parsed, webAppTitle, null, true);
   const page = _inlineImagesAsDataUris(
     _buildWebHtml(webAppTitle, webAppTitle, "", archive, footerHtml),
   );

@@ -448,12 +448,12 @@ const _archiveListHtml = (titles, pageTitle, forNetlify) => {
 };
 
 const _buildIndexHtml = (
-  rawDocHtml,
+  parsedHtml,
   webAppTitle,
   subject = null,
   forNetlify = false,
 ) => {
-  const titles = _extractAllH1Titles(HTMLParser.parse(rawDocHtml));
+  const titles = _extractAllH1Titles(parsedHtml);
   let contentHtml = _archiveListHtml(titles, webAppTitle, forNetlify);
   if (subject) {
     const subject_ = `“${_escapeHtml(subject)}”`;
