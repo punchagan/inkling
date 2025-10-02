@@ -24,8 +24,5 @@ test("_buildWebHtml", () => {
     footerHtml,
   );
 
-  // Write it to a temp file in /tmp for manual inspection if needed
-  const path = "/tmp/test_buildWebHtml.html";
-  fs.writeFileSync(path, html, "utf8");
-  console.log(`Wrote test HTML to file://${path}`);
+  expect(html).toMatchSnapshot();
 });
