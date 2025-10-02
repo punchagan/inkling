@@ -1,23 +1,43 @@
-const _inlineImagesAsDataUris = (html) => {
-  return html.replace(/<img\b[^>]*src=["']([^"']+)["'][^>]*>/gi, (m, src) => {
-    try {
-      const needsAuth =
-        /googleusercontent\.com|docs\.google\.com|drive\.google\.com/i.test(
-          src,
-        );
-      const opts = { muteHttpExceptions: true, followRedirects: true };
-      if (needsAuth)
-        opts.headers = { Authorization: "Bearer " + ScriptApp.getOAuthToken() };
-      const res = UrlFetchApp.fetch(src, opts);
-      if (res.getResponseCode() >= 200 && res.getResponseCode() < 300) {
-        const b = res.getBlob();
-        const mime = b.getContentType() || "image/png";
-        const b64 = Utilities.base64Encode(b.getBytes());
-        return m.replace(src, `data:${mime};base64,${b64}`);
+const _imageToData = (imageUrl) => {
+  try {
+    const needsAuth =
+      /googleusercontent\.com|docs\.google\.com|drive\.google\.com/i.test(
+        imageUrl,
+      );
+    const opts = { muteHttpExceptions: true, followRedirects: true };
+    if (needsAuth)
+      opts.headers = { Authorization: "Bearer " + ScriptApp.getOAuthToken() };
+    const res = UrlFetchApp.fetch(imageUrl, opts);
+    if (res.getResponseCode() >= 200 && res.getResponseCode() < 300) {
+      const b = res.getBlob();
+      const mime = b.getContentType() || "image/png";
+      const bytes = b.getBytes();
+      return { mime, bytes };
+    }
+  } catch (_) {}
+  return null;
+};
+
+const _replaceImageURLs = (html, slug) => {
+  const parsed = HTMLParser.parse(html);
+  const images = parsed.querySelectorAll("img");
+  const pushData = [];
+  images.forEach((img, idx) => {
+    const src = img.getAttribute("src");
+    if (src && /^https?:\/\//i.test(src)) {
+      const data = _imageToData(src);
+      if (data && data.bytes && data.mime) {
+        const ext = data.mime.split("/")[1] || "png";
+        const path = `/images/${slug}-${idx}.${ext}`;
+        img.setAttribute("src", path);
+        pushData.push({ path, ...data });
+        console.log(`Inlined image ${idx + 1} for ${slug}`);
+      } else {
+        console.warn(`Failed to fetch image ${idx + 1} for ${slug}: ${src}`);
       }
-    } catch (_) {}
-    return m;
+    }
   });
+  return { html: parsed.toString(), images: pushData };
 };
 
 const _netlifyApi = (method, path, payloadObj, extra) => {
@@ -49,38 +69,54 @@ const _netlifyApi = (method, path, payloadObj, extra) => {
 const _buildSiteFiles = () => {
   const docId = _getDocId();
   const parsed = HTMLParser.parse(_fetchDocHtml(docId));
-  const footerHtml = _extractWrappedFooter(parsed);
   const titles = _extractAllH1Titles(parsed);
   const webAppTitle = Drive.Files.get(docId).name || "Newsletter";
 
   const files = [];
-
   console.log(`Building site with ${titles.length} editions`);
+
+  const footer = _extractWrappedFooter(parsed);
+  const { html: footerHtml, images: footerImages } = _replaceImageURLs(
+    footer,
+    "footer",
+  );
+  files.push(...footerImages);
 
   // Per-edition pages
   titles.forEach((title) => {
     const section = _extractEditionSection(parsed, title);
-    const extraStyle = _extractPageStyle(parsed);
     if (!section) return;
-    const page = _inlineImagesAsDataUris(
-      _buildWebHtml(webAppTitle, title, extraStyle, section, footerHtml),
-    );
+    const extraStyle = _extractPageStyle(parsed);
     const slug = _slugify(title);
-    const bytes = Utilities.newBlob(page, "text/html").getBytes();
+    const { html: sectionHtml, images: sectionImages } = _replaceImageURLs(
+      section,
+      slug,
+    );
+    files.push(...sectionImages);
+    const page = _buildWebHtml(
+      webAppTitle,
+      title,
+      extraStyle,
+      sectionHtml,
+      footerHtml,
+    );
+
+    const mime = "text/html";
+    const bytes = Utilities.newBlob(page, mime).getBytes();
     files.push({
-      path: `article/${slug}.html`,
+      path: `/article/${slug}.html`,
       bytes,
-      mime: "text/html",
+      mime,
     });
   });
 
   // Archive page
+  // NOTE: Assuming no images in index/archive
   const archive = _buildIndexHtml(parsed, webAppTitle, null, true);
-  const page = _inlineImagesAsDataUris(
-    _buildWebHtml(webAppTitle, webAppTitle, "", archive, footerHtml),
-  );
+  const page = _buildWebHtml(webAppTitle, webAppTitle, "", archive, footerHtml);
+
   files.push({
-    path: "index.html",
+    path: "/index.html",
     bytes: Utilities.newBlob(page, "text/html").getBytes(),
     mime: "text/html",
   });
@@ -124,7 +160,7 @@ const deployToNetlify = () => {
   );
 
   requiredFiles.forEach((f) => {
-    const path = encodeURI(`/${f.path}`);
+    const path = encodeURI(f.path);
     const res = _netlifyApi(
       "put",
       `/api/v1/deploys/${encodeURIComponent(deployId)}/files${path}`,
