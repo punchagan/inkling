@@ -13,13 +13,14 @@ const doGet = (e) => {
     contentHtml = _extractEditionSection(parsedHtml, subject);
   }
   if (!contentHtml) {
-    contentHtml = _buildIndexHtml(parsedHtml, webAppTitle, subject);
+    contentHtml = _buildIndexHtml(parsedHtml, webAppTitle, subject, false);
   }
   const pageTitleText = subject
     ? `${subject} — ${webAppTitle}`
     : `${webAppTitle} — Archive`;
   const footerHtml = _extractWrappedFooter(parsedHtml);
   const html = _buildWebHtml(
+    webAppTitle,
     pageTitleText,
     pageStyle,
     contentHtml,
