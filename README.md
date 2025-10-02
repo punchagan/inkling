@@ -78,7 +78,8 @@ The Sheet will hold:
 3. Copy-paste all the code from the [`src/`](src/) folder of this repo into the
    editor. You can copy each of the files with the same names into the editor.
    If you are comfortable using `git` and command line tools, you can see the
-   "Development setup" section below to avoid the manual copying.
+   [Development setup](#development-setup-optional) section below to avoid the
+   manual copying.
 
 4. Save.
 
