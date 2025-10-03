@@ -8,3 +8,25 @@ const CONFIG = {
   },
   RATE_LIMIT_MS: 1200,
 };
+
+const CONFIG_PROPERTIES = {
+  // Content Google Doc
+  DOC_ID: "",
+  // Web app settings
+  WEBAPP_BASE_URL: "",
+  // Netlify settings
+  NETLIFY_SITE_ID: "",
+  NETLIFY_TOKEN: "",
+  NETLIFY_URL: "",
+};
+
+const setupProperties = () => {
+  // Initialize script properties if not set
+  // (only needs to be done once). But, idempotent.
+  const props = PropertiesService.getScriptProperties();
+  Object.entries(CONFIG_PROPERTIES).forEach(([key, def]) => {
+    if (props.getProperty(key) === null) {
+      props.setProperty(key, def);
+    }
+  });
+};

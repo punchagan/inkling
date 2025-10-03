@@ -65,7 +65,7 @@ The code lives inside your Google Sheet using Google Apps Script.
 If you are comfortable using `git` and command line tools, see the [Development
 setup](#development-setup-optional) section below to avoid the manual copying.
 
-### C. Make the 'Inkling' Menu Appear
+### C. Make the 'Inkling' Menu Appear & Setup Properties
 
 You should see the **Inkling** menu in the **Google Sheet** automatically, in a
 few seconds, after reloading it. If it doesn’t, show up, you may need to manually set it up:
@@ -74,19 +74,22 @@ few seconds, after reloading it. If it doesn’t, show up, you may need to manua
 
 2. Click **Add Trigger** (bottom right).
 
-3. Set the three dropdowns to: `onOpen` •  `From spreadsheet` • `On open` 
+3. Set the three dropdowns to: `onOpen` •  `From spreadsheet` • `On open`
+
+4. Reload the **Google Sheet** to see the Inkling menu. Click **Inkling → Setup
+   Properties** to set empty/default values of properties that you can quickly
+   edit.
 
 ### D. Connect Your Doc and Sheet
 
 You need to tell the script where your content is located.
-
 
 1. In the Apps Script editor, go to **Project Settings** (gear icon on the
    left) → **Script Properties**.
 
 2. Click **Add Script Property**.
 
-3. Add the property `DOC_ID`.
+3. Edit the property `DOC_ID`.
 
 4. The value is the long string of letters/numbers in your Google Doc's URL
    (e.g., the part between `/d/` and `/edit`).
@@ -103,9 +106,9 @@ This creates a public, stable link for your Newsletter editions
 
 4. Deploy. Copy the resulting `/exec` URL.
 
-5. Go back to **Project Settings → Script Properties** and add a new property:
+5. Go back to **Project Settings → Script Properties** and set the property:
    `WEBAPP_BASE_URL` with the copied `/exec` URL as its value.
-   
+
 ## Bonus Features
 
 These steps are **optional** and intended for users who want to add extra flair
@@ -132,7 +135,7 @@ own page) to Netlify using the **Inkling → Deploy site to Netlify** menu item.
 
 2. Create a new Netlify site (empty is okay — Inkling will populate it!)
 
-3. **Add Script Properties**: In your Google Apps Script Properties, add the following three properties to connect Netlify:
+3. **Add Script Properties**: In your Google Apps Script Properties, set the following three properties to connect Netlify:
   - `NETLIFY_SITE_ID`: Found in `Netlify UI → Site settings → General → Site
     details → API ID` .
   - `NETLIFY TOKEN`: A Personal Access Token you create in `Netlify UI → User

@@ -9,5 +9,7 @@ const onOpen = () => {
     .addSeparator()
     .addItem("Deploy site to Netlify", "deployToNetlify")
     .addItem("Open Netlify site", "openNetlifySite")
+    .addSeparator()
+    .addItem("Setup Properties", "setupProperties")
     .addToUi();
 };
