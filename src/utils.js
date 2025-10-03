@@ -23,6 +23,11 @@ const _getSubject = () =>
 
 const _getWebAppTitle = (docId) => Drive.Files.get(docId).name || "Newsletter";
 
+const _getProperty = (key) => {
+  const props = PropertiesService.getScriptProperties();
+  return props.getProperty(key);
+};
+
 const _getWebAppExecUrl = () => {
   const props = PropertiesService.getScriptProperties();
   const override = props.getProperty("WEBAPP_BASE_URL"); // preferred
@@ -275,8 +280,7 @@ const _prepareEmailBodyOnce = (editionHtml, footerHtml) => {
 };
 
 const _articleURL = (subject, relative = false, forNetlify = false) => {
-  const props = PropertiesService.getScriptProperties();
-  const netlifyURL = props.getProperty("NETLIFY_URL");
+  const netlifyURL = _getProperty("NETLIFY_URL");
   let webAppUrl;
 
   if (netlifyURL && forNetlify) {
@@ -404,6 +408,7 @@ const _sendEmailsFromDoc = (contacts, test = true) => {
     failed = 0;
 
   const fromHeader = _getEmailFromHeader();
+  const showViewInBrowser = _getProperty("EMAIL_SHOW_WEB_LINK") == "true";
 
   for (let i = 0; i < contacts.length; i++) {
     const [name, email, row] = contacts[i];
@@ -423,7 +428,7 @@ const _sendEmailsFromDoc = (contacts, test = true) => {
         name,
         introHtml,
         bodyHtml,
-        webAppUrl,
+        showViewInBrowser && webAppUrl,
       );
 
       _sendEmailAdvanced({

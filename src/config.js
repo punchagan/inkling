@@ -21,6 +21,7 @@ const CONFIG_PROPERTIES = {
   // Email settings
   // Sender name (e.g. "Alice from Inkling")
   EMAIL_SENDER_NAME: "",
+  EMAIL_SHOW_WEB_LINK: true,
 };
 
 const setupProperties = () => {
