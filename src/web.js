@@ -4,7 +4,7 @@ const doGet = (e) => {
   const subjectParam = e && e.parameter && e.parameter.subject;
   const subject = subjectParam ? String(subjectParam).trim() : "";
   const execBase = _getWebAppExecUrl();
-  const webAppTitle = Drive.Files.get(docId).name || "Newsletter";
+  const webAppTitle = _getWebAppTitle(docId);
   let contentHtml;
 
   let pageStyle = _extractPageStyle(parsedHtml);

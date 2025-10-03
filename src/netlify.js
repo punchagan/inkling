@@ -70,7 +70,7 @@ const _buildSiteFiles = () => {
   const docId = _getDocId();
   const parsed = HTMLParser.parse(_fetchDocHtml(docId));
   const titles = _extractAllH1Titles(parsed);
-  const webAppTitle = Drive.Files.get(docId).name || "Newsletter";
+  const webAppTitle = _getWebAppTitle(docId);
 
   const files = [];
   console.log(`Building site with ${titles.length} editions`);

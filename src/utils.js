@@ -21,6 +21,8 @@ const _setMsg = (msg, ok = true, cell = CONFIG.SHEET.MSG_CELL) =>
 const _getSubject = () =>
   _sheet().getRange(CONFIG.SHEET.SUBJECT_CELL).getValue();
 
+const _getWebAppTitle = (docId) => Drive.Files.get(docId).name || "Newsletter";
+
 const _getWebAppExecUrl = () => {
   const props = PropertiesService.getScriptProperties();
   const override = props.getProperty("WEBAPP_BASE_URL"); // preferred
