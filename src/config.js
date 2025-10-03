@@ -18,6 +18,9 @@ const CONFIG_PROPERTIES = {
   NETLIFY_SITE_ID: "",
   NETLIFY_TOKEN: "",
   NETLIFY_URL: "",
+  // Email settings
+  // Sender name (e.g. "Alice from Inkling")
+  EMAIL_SENDER_NAME: "",
 };
 
 const setupProperties = () => {

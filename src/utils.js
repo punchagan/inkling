@@ -221,6 +221,13 @@ const _getDocId = () => {
   return docId;
 };
 
+const _getEmailFromHeader = () => {
+  const props = PropertiesService.getScriptProperties();
+  const senderName = (props.getProperty("EMAIL_SENDER_NAME") || "").trim();
+  const userEmail = Session.getActiveUser().getEmail();
+  return senderName ? `${senderName} <${userEmail}>` : userEmail;
+};
+
 const _prepareInlineImages = (html) => {
   const inlineImages = {};
   let idx = 0;
@@ -295,12 +302,13 @@ const _encodeRFC2047 = (s) => {
 const _wrap76 = (s) => s.replace(/.{1,76}/g, "$&\r\n");
 
 // Build a MIME message with multipart/related (html+inline images) and multipart/alternative (text/html)
-const _buildMimeMessage = ({ to, subject, html, text, inlineImages }) => {
+const _buildMimeMessage = ({ to, from, subject, html, text, inlineImages }) => {
   const boundaryRel = "rel_" + Utilities.getUuid();
   const boundaryAlt = "alt_" + Utilities.getUuid();
 
   const headers = [
     `To: ${to}`,
+    `From: ${from}`,
     `Subject: ${_encodeRFC2047(subject)}`,
     `MIME-Version: 1.0`,
     `Content-Type: multipart/related; boundary="${boundaryRel}"`,
@@ -351,8 +359,9 @@ const _buildMimeMessage = ({ to, subject, html, text, inlineImages }) => {
 };
 
 // Send via Gmail Advanced Service
-const _sendEmailAdvanced = ({ to, subject, html, text, inlineImages }) => {
-  const mime = _buildMimeMessage({ to, subject, html, text, inlineImages });
+//
+const _sendEmailAdvanced = (data) => {
+  const mime = _buildMimeMessage(data);
   const raw = Utilities.base64EncodeWebSafe(
     mime,
     Utilities.Charset.UTF_8,
@@ -394,8 +403,11 @@ const _sendEmailsFromDoc = (contacts, test = true) => {
   let sent = 0,
     failed = 0;
 
+  const fromHeader = _getEmailFromHeader();
+
   for (let i = 0; i < contacts.length; i++) {
     const [name, email, row] = contacts[i];
+    const toHeader = name ? `${name} <${email}>` : email;
     const statusCell = `${statusCol}${row}`;
 
     if (!_isValidEmail(email)) {
@@ -415,7 +427,8 @@ const _sendEmailsFromDoc = (contacts, test = true) => {
       );
 
       _sendEmailAdvanced({
-        to: email,
+        to: toHeader,
+        from: fromHeader,
         subject: emailSubject, // keep your existing variable
         html: personalizedHtml, // includes your header/button/footer
         text: _stripHtml(personalizedHtml),
