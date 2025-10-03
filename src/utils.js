@@ -382,7 +382,11 @@ const _sendEmailsFromDoc = (contacts, test = true) => {
     footerHtml,
   );
 
-  const emailSubject = test ? `[TEST] ${subject}` : subject;
+  const docId = _getDocId();
+  const newsletterTitle = _getWebAppTitle(docId);
+  const emailSubject = test
+    ? `[TEST] ${subject} — ${newsletterTitle}`
+    : `${subject} — ${newsletterTitle}`;
   _setMsg(`Sending “${emailSubject}” to ${contacts.length}…`);
 
   const sh = _sheet();
