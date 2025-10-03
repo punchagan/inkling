@@ -10,7 +10,7 @@ const doGet = (e) => {
   let pageStyle = _extractPageStyle(parsedHtml);
 
   if (subject) {
-    contentHtml = _extractEditionSection(parsedHtml, subject);
+    contentHtml = _extractEditionSection(parsedHtml, subject, true);
   }
   if (!contentHtml) {
     contentHtml = _buildIndexHtml(parsedHtml, webAppTitle, subject, false);

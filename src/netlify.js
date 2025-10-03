@@ -84,7 +84,7 @@ const _buildSiteFiles = () => {
 
   // Per-edition pages
   titles.forEach((title) => {
-    const section = _extractEditionSection(parsed, title);
+    const section = _extractEditionSection(parsed, title, true);
     if (!section) return;
     const extraStyle = _extractPageStyle(parsed);
     const slug = _slugify(title);

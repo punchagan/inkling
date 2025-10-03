@@ -12,7 +12,11 @@ test("_buildWebHtml", () => {
   const currDir = __dirname;
   const rawHtml = fs.readFileSync(currDir + "/fixtures/raw.html", "utf8");
   const parsed = HTMLParser.parse(rawHtml);
-  const section = _extractEditionSection(parsed, "Curiosities of the World");
+  const section = _extractEditionSection(
+    parsed,
+    "Curiosities of the World",
+    true,
+  );
   expect(section).toBeDefined();
   const footerHtml = _extractWrappedFooter(parsed);
   const extraStyle = _extractPageStyle(parsed);

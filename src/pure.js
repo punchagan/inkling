@@ -110,7 +110,7 @@ const _extractAllH1Titles = (parsedHtml) => {
   });
 };
 
-const _extractEditionSection = (parsedHtml, subject) => {
+const _extractEditionSection = (parsedHtml, subject, responsive = false) => {
   if (!parsedHtml) return undefined;
 
   const targetSlug = _slugify(subject);
@@ -131,8 +131,10 @@ const _extractEditionSection = (parsedHtml, subject) => {
 
   // If the body has a width in pt, set image widths as % of that width to make
   // page responsive
-  const bodyWidth = _getBodyWidth(parsedHtml);
-  if (bodyWidth) _setImageWidths(parsedHtml, bodyWidth);
+  if (responsive) {
+    const bodyWidth = _getBodyWidth(parsedHtml);
+    if (bodyWidth) _setImageWidths(parsedHtml, bodyWidth);
+  }
 
   // 2) collect this <h1> and subsequent siblings until the next <h1>
   const pieces = [];
