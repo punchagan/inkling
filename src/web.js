@@ -48,6 +48,12 @@ const doPost = (e) => {
   const name = params.name ? String(params.name).trim() : "";
   const returnParam = params.return ? String(params.return).trim() : "";
   const goBackTo = _safeReturnUrl(returnParam);
+  const honeypot = params.phone ? String(params.phone).trim() : "";
+
+  if (honeypot) {
+    // Bot submission; ignore
+    return _redirectHtml(goBackTo, "Thank you for subscribing!");
+  }
 
   if (!email || !_isValidEmail(email)) {
     return _redirectHtml(

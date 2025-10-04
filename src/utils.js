@@ -495,6 +495,7 @@ const _subscribeFormHtml = () => {
       </p>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <input type="hidden" name="return" />
+        <input type="hidden" name="phone" />
         <input type="text" name="name" placeholder="Your name (optional)"
           style="flex:1;min-width:160px;padding:8px;font:14px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;border:1px solid #ccc;border-radius:4px" />
         <input type="email" name="email" placeholder="Your email address" required
