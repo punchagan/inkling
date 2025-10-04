@@ -12,6 +12,16 @@ const _okStyle = SpreadsheetApp.newTextStyle()
 
 const _sheet = () => SpreadsheetApp.getActiveSheet();
 
+const _getSubscriptionsSheet = () => {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = ss.getSheetByName(CONFIG.SHEET.SUBSCRIPTIONS_SHEET_NAME);
+  if (!sheet) {
+    sheet = ss.insertSheet(CONFIG.SHEET.SUBSCRIPTIONS_SHEET_NAME);
+    sheet.appendRow(["Timestamp", "Name", "Email"]);
+  }
+  return sheet;
+};
+
 const _setMsg = (msg, ok = true, cell = CONFIG.SHEET.MSG_CELL) =>
   _sheet()
     .getRange(cell)
@@ -408,7 +418,7 @@ const _sendEmailsFromDoc = (contacts, test = true) => {
     failed = 0;
 
   const fromHeader = _getEmailFromHeader();
-  const showViewInBrowser = _getProperty("EMAIL_SHOW_WEB_LINK") == "true";
+  const showViewInBrowser = _getProperty("EMAIL_SHOW_WEB_LINK") === "true";
 
   for (let i = 0; i < contacts.length; i++) {
     const [name, email, row] = contacts[i];
@@ -471,6 +481,33 @@ const _archiveListHtml = (titles, pageTitle, forNetlify) => {
   `;
 };
 
+const _subscribeFormHtml = () => {
+  return `
+    <form
+        method="POST"
+        action="${_getWebAppExecUrl()}"
+        onsubmit="this.return.value = location.href"
+        target="_top"
+        style="margin:32px 0;max-width:400px;padding:16px;border:1px solid #ddd;border-radius:8px;background:#f9f9f9;>
+
+      <p style="margin:0 0 12px;font-size:14px;color:#555">
+        Get future editions delivered to your inbox.
+      </p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <input type="hidden" name="return" />
+        <input type="text" name="name" placeholder="Your name (optional)"
+          style="flex:1;min-width:160px;padding:8px;font:14px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;border:1px solid #ccc;border-radius:4px" />
+        <input type="email" name="email" placeholder="Your email address" required
+          style="flex:1;min-width:160px;padding:8px;font:14px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;border:1px solid #ccc;border-radius:4px" />
+        <button type="submit"
+          style="padding:8px 16px;font:14px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;color:#fff;background-color:#0b66ff;border:none;border-radius:4px;cursor:pointer">
+          Subscribe
+        </button>
+      </div>
+    </form>
+  `;
+};
+
 const _buildIndexHtml = (
   parsedHtml,
   webAppTitle,
@@ -484,5 +521,55 @@ const _buildIndexHtml = (
     const prefix = `<p style="color:#b00;margin:0 0 12px">Couldn’t find ${subject_}.</p>`;
     contentHtml = `${prefix}\n${contentHtml}`;
   }
+  // Add subscribe form at the bottom of the Index page
+  const allow_subscriptions = _getProperty("WEBAPP_ALLOW_SUBSCRIBE") === "true";
+  if (allow_subscriptions) {
+    contentHtml = `${contentHtml}\n${_subscribeFormHtml()}`;
+  }
   return contentHtml;
+};
+
+// Allowed bases = your Netlify site + your Web App base
+const _allowedReturnBases = () => {
+  const bases = [];
+  const netlify = _getProperty("NETLIFY_URL");
+  if (netlify) bases.push(String(netlify).replace(/\/$/, ""));
+  const webapp = _getWebAppExecUrl();
+  if (webapp) bases.push(String(webapp).replace(/\/exec$/, ""));
+  return bases;
+};
+
+const _isAllowedReturn = (url) => {
+  try {
+    const u = new URL(String(url));
+    // Only http/https; block javascript:, data:, mailto:, etc.
+    if (!/^https?:$/.test(u.protocol)) return false;
+    // Must start with one of the allowed bases
+    return _allowedReturnBases().some((base) => String(url).startsWith(base));
+  } catch {
+    return false;
+  }
+};
+
+const _safeReturnUrl = (maybeUrl) => {
+  if (maybeUrl && _isAllowedReturn(maybeUrl)) return maybeUrl;
+  // Fallbacks (prefer Netlify, else Web App archive)
+  const bases = _allowedReturnBases();
+  if (bases.length) return bases[0];
+  return ""; // final fallback: show a simple thank-you page
+};
+
+// Small HTML page that redirects (with JS + <meta> + link fallback)
+const _redirectHtml = (to, message = "Thank you!") => {
+  const webAppTitle = _getWebAppTitle(_getDocId()) || "Newsletter";
+  const link = to ? `<p><a target="_top" href="${to}">Go Back</a></p>` : "";
+  const html = `<!doctype html><meta charset="utf-8">
+<title>Subscriptions — ${webAppTitle}</title>
+<div style="font:16px/1.6 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;max-width:560px;margin:40px auto">
+  <p>${message}</p>
+  ${link}
+</div>`;
+  return HtmlService.createHtmlOutput(html).setXFrameOptionsMode(
+    HtmlService.XFrameOptionsMode.ALLOWALL,
+  );
 };

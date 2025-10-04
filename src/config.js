@@ -4,6 +4,7 @@ const CONFIG = {
     MSG_CELL: "E4", // status messages from the script
     STATUS_COL: "D", // per-row status writeback
     CONTACTS_RANGE_START: "A2", // A: Name, B: Email
+    SUBSCRIPTIONS_SHEET_NAME: "New Subscriptions",
   },
   RATE_LIMIT_MS: 1200,
 };
@@ -13,6 +14,7 @@ const CONFIG_PROPERTIES = {
   DOC_ID: "",
   // Web app settings
   WEBAPP_BASE_URL: "",
+  WEBAPP_ALLOW_SUBSCRIBE: false, // Whether to show a "subscribe" link in the web app.
   // Netlify settings
   NETLIFY_SITE_ID: "",
   NETLIFY_TOKEN: "",
