@@ -203,7 +203,7 @@ const _fetchDocHtml = (docId) => {
   // Try Advanced Service export first
   try {
     var resp = Drive.Files.export(docId, "text/html"); // HTTPResponse
-    return resp.getBlob().getDataAsString("UTF-8");
+    return _unwrapGoogleRedirects(resp.getBlob().getDataAsString("UTF-8"));
   } catch (e) {
     // Fallback: explicit REST call with alt=media
     var url =
@@ -218,7 +218,7 @@ const _fetchDocHtml = (docId) => {
     var resp2 = UrlFetchApp.fetch(url, params);
     var code = resp2.getResponseCode();
     if (code >= 200 && code < 300) {
-      return resp2.getContentText("UTF-8");
+      return _unwrapGoogleRedirects(resp2.getContentText("UTF-8"));
     }
     throw new Error(
       `Drive export failed ${code}: ${resp2.getContentText().slice(0, 200)}`,

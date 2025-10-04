@@ -354,6 +354,19 @@ const _stripHtml = (s) =>
     .replace(/<[^>]+>/g, " ")
     .trim();
 
+const _unwrapGoogleRedirects = (html) => {
+  // Google Docs export wraps links in a redirect URL like:
+  // https://www.google.com/url?q=https://example.com/&sa=D&source=editors&ust=...
+  // This function unwraps those to get the real URL.
+
+  if (!html) return "";
+
+  return html.replace(
+    /https?:\/\/www\.google\.com\/url\?q=([^&\s]+)&[^"\s]*/g,
+    (m, p1) => decodeURIComponent(p1),
+  );
+};
+
 if (typeof module !== "undefined") {
   module.exports = {
     _buildWebHtml,
@@ -370,5 +383,6 @@ if (typeof module !== "undefined") {
     _sha1Hex,
     _slugify,
     _stripHtml,
+    _unwrapGoogleRedirects,
   };
 }
