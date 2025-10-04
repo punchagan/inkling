@@ -160,10 +160,10 @@ const _getContacts = () => {
     .getRange(`${CONFIG.SHEET.CONTACTS_RANGE_START}:C${lastRow}`)
     .getValues();
   return rng
-    .map(([name, email, sent], i) => [
+    .map(([name, email, send], i) => [
       String(name || "").trim(),
       String(email || "").trim(),
-      String(sent || "")
+      String(send || "")
         .trim()
         .toLowerCase()
         .charAt(0) !== "n",
