@@ -1,14 +1,16 @@
-const _errStyle = SpreadsheetApp.newTextStyle()
-  .setFontSize(9)
-  .setBold(true)
-  .setForegroundColor("red")
-  .build();
+const _errStyle = () =>
+  SpreadsheetApp.newTextStyle()
+    .setFontSize(9)
+    .setBold(true)
+    .setForegroundColor("red")
+    .build();
 
-const _okStyle = SpreadsheetApp.newTextStyle()
-  .setFontSize(9)
-  .setBold(true)
-  .setForegroundColor("green")
-  .build();
+const _okStyle = () =>
+  SpreadsheetApp.newTextStyle()
+    .setFontSize(9)
+    .setBold(true)
+    .setForegroundColor("green")
+    .build();
 
 const _sheet = () => SpreadsheetApp.getActiveSheet();
 
@@ -26,7 +28,7 @@ const _setMsg = (msg, ok = true, cell = CONFIG.SHEET.MSG_CELL) =>
   _sheet()
     .getRange(cell)
     .setValue(msg)
-    .setTextStyle(ok ? _okStyle : _errStyle);
+    .setTextStyle(ok ? _okStyle() : _errStyle());
 
 const _getSubject = () =>
   _sheet().getRange(CONFIG.SHEET.SUBJECT_CELL).getValue();
@@ -574,3 +576,12 @@ const _redirectHtml = (to, message = "Thank you!") => {
     HtmlService.XFrameOptionsMode.ALLOWALL,
   );
 };
+
+if (typeof module !== "undefined") {
+  const Pure = require("./pure.js");
+  Object.assign(global, Pure);
+  module.exports = {
+    _composeEmailHtml,
+    _prepareEmailBodyOnce,
+  };
+}

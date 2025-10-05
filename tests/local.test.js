@@ -1,9 +1,12 @@
 const {
+  _buildWebHtml,
   _extractEditionSection,
+  _extractIntro,
   _extractPageStyle,
   _extractWrappedFooter,
-  _buildWebHtml,
 } = require("../src/pure");
+const { _composeEmailHtml, _prepareEmailBodyOnce } = require("../src/utils");
+
 const fs = require("fs");
 const HTMLParser = require("node-html-parser");
 global.HTMLParser = HTMLParser;
@@ -28,5 +31,26 @@ test("_buildWebHtml", () => {
     footerHtml,
   );
 
+  expect(html).toMatchSnapshot();
+});
+
+test("_composeEmailHtml", () => {
+  const currDir = __dirname;
+  const rawHtml = fs.readFileSync(currDir + "/fixtures/raw.html", "utf8");
+  const parsed = HTMLParser.parse(rawHtml);
+  const introHtml = _extractIntro(parsed);
+  const footerHtml = _extractWrappedFooter(parsed);
+  const section = _extractEditionSection(
+    parsed,
+    "Curiosities of the World",
+    false,
+  );
+  expect(section).toBeDefined();
+  const { bodyHtml } = _prepareEmailBodyOnce(introHtml, section, footerHtml);
+  const html = _composeEmailHtml(
+    "Alice",
+    bodyHtml,
+    "https://example.com/view-in-browser",
+  );
   expect(html).toMatchSnapshot();
 });
