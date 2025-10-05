@@ -26,16 +26,12 @@ test("_composeEmailHtml", () => {
 <body style="margin:0;padding:0;background:#ffffff;color:#111111;font:16px/1.5 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial">
   <div style="max-width:640px;margin:0 auto;padding:20px">
     <div style="margin-top:18px">
-      <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:16px 0">
-         <tr>
-           <td align="center" bgcolor="#0b66ff" style="border-radius:8px">
-             <a href="http://example.com" target="_blank" rel="noopener"
-                style="display:inline-block;padding:12px 16px;font:bold 14px/1.2 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;color:#ffffff;text-decoration:none;border-radius:8px">
-               Trouble reading the email? Read on the web!
-             </a>
-           </td>
-         </tr>
-       </table>
+      <div style="text-align:right;margin:8px 0 16px">
+       <a href="${browserUrl}" target="_blank" rel="noopener"
+          style="font:12px/1.2 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;color:#6b7280;text-decoration:underline">
+         View in browser →
+       </a>
+     </div>
       <p style="margin:0 0 12px">Hi Alice,</p>
       <div style="margin:10px 0;">Intro text here.</div>
       <p>This is the main content of the email.</p>
