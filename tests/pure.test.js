@@ -18,9 +18,9 @@ global.HTMLParser = HTMLParser;
 test("_composeEmailHtml", () => {
   const browserUrl = "http://example.com";
   const banner = '<div style="background:#eee;padding:10px;">Banner</div>';
-  const bodyHtml = "<p>This is the main content of the email.</p>";
   const greeting = '<div style="margin:10px 0;">Hello Alice,</div>';
   const intro = '<div style="margin:10px 0;">Intro text here.</div>';
+  const bodyHtml = `${intro}\n      <p>This is the main content of the email.</p>`;
   const fullHtml = `<!doctype html>
 <html>
 <body style="margin:0;padding:0;background:#ffffff;color:#111111;font:16px/1.5 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial">
@@ -43,16 +43,14 @@ test("_composeEmailHtml", () => {
   </div>
 </body>
 </html>`;
-  expect(_composeEmailHtml("Alice", intro, bodyHtml, browserUrl)).toBe(
-    fullHtml,
-  );
-  expect(_composeEmailHtml("", intro, bodyHtml, browserUrl)).toBe(
+  expect(_composeEmailHtml("Alice", bodyHtml, browserUrl)).toBe(fullHtml);
+  expect(_composeEmailHtml("", bodyHtml, browserUrl)).toBe(
     fullHtml.replace("Alice", "there"),
   );
-  expect(_composeEmailHtml(null, intro, bodyHtml, browserUrl)).toBe(
+  expect(_composeEmailHtml(null, bodyHtml, browserUrl)).toBe(
     fullHtml.replace("Alice", "there"),
   );
-  expect(_composeEmailHtml(" Bob ", intro, bodyHtml, browserUrl)).toBe(
+  expect(_composeEmailHtml(" Bob ", bodyHtml, browserUrl)).toBe(
     fullHtml.replace("Alice", "Bob"),
   );
 });

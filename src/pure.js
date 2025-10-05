@@ -54,7 +54,7 @@ const _buildWebHtml = (
   return html;
 };
 
-const _composeEmailHtml = (name, intro, bodyHtml, browserUrl) => {
+const _composeEmailHtml = (name, bodyHtml, browserUrl) => {
   const safeName = _escapeHtml(_ensureName(name));
   const greeting = `<p style="margin:0 0 12px">Hi ${safeName},</p>`;
   const button = browserUrl
@@ -77,7 +77,6 @@ const _composeEmailHtml = (name, intro, bodyHtml, browserUrl) => {
     <div style="margin-top:18px">
       ${button}
       ${greeting}
-      ${intro}
       ${bodyHtml}
     </div>
   </div>

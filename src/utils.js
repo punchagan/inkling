@@ -281,9 +281,9 @@ const _prepareInlineImages = (html) => {
   return { html, inlineImages };
 };
 
-const _prepareEmailBodyOnce = (editionHtml, footerHtml) => {
+const _prepareEmailBodyOnce = (introHtml, editionHtml, footerHtml) => {
   footerHtml = _sanitizeDocHtml(footerHtml);
-  let fullHtml = `${editionHtml}\n${footerHtml}`;
+  let fullHtml = `${introHtml}\n${editionHtml}\n${footerHtml}`;
   let { html, inlineImages } = _prepareInlineImages(fullHtml);
   html = html.replace(/<script[\s\S]*?<\/script>/gi, "");
   return { bodyHtml: html, inlineImages };
@@ -402,6 +402,7 @@ const _sendEmailsFromDoc = (contacts, test = true) => {
   const introHtml = _extractIntro(parsedHtml);
   const footerHtml = _extractWrappedFooter(parsedHtml);
   const { bodyHtml, inlineImages } = _prepareEmailBodyOnce(
+    introHtml,
     editionHtml,
     footerHtml,
   );
@@ -436,7 +437,6 @@ const _sendEmailsFromDoc = (contacts, test = true) => {
       // Build per-recipient HTML you already have
       const personalizedHtml = _composeEmailHtml(
         name,
-        introHtml,
         bodyHtml,
         showViewInBrowser && webAppUrl,
       );
