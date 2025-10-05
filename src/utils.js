@@ -388,7 +388,8 @@ const _sendEmailsFromDoc = (contacts, test = true) => {
 
   const webAppUrl = _articleURL(subject, false, true);
   _setMsg("Fetching document…");
-  const rawDocHtml = _fetchDocHtml(_getDocId());
+  const docId = _getDocId();
+  const rawDocHtml = _fetchDocHtml(docId);
   const parsedHtml = HTMLParser.parse(rawDocHtml);
   const editionHtml = _extractEditionSection(parsedHtml, subject);
   if (!editionHtml)
@@ -405,7 +406,6 @@ const _sendEmailsFromDoc = (contacts, test = true) => {
     footerHtml,
   );
 
-  const docId = _getDocId();
   const newsletterTitle = _getWebAppTitle(docId);
   const emailSubject = test
     ? `[TEST] ${subject} — ${newsletterTitle}`
