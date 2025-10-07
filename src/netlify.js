@@ -110,9 +110,27 @@ const _buildSiteFiles = () => {
     });
   });
 
+  // Subscribe page
+  const allow_subscriptions = _getProperty("WEBAPP_ALLOW_SUBSCRIBE") === "true";
+  if (allow_subscriptions) {
+    const execUrl = _getWebAppExecUrl();
+    const subscribeHtml = _subscribeFormHtml(execUrl);
+    const subscribePage = _buildWebHtml(
+      webAppTitle,
+      `Subscribe`,
+      "",
+      subscribeHtml,
+      footerHtml,
+    );
+    files.push({
+      path: "/subscribe.html",
+      bytes: Utilities.newBlob(subscribePage, "text/html").getBytes(),
+      mime: "text/html",
+    });
+  }
+
   // Archive page
   // NOTE: Assuming no images in index/archive
-  const allow_subscriptions = _getProperty("WEBAPP_ALLOW_SUBSCRIBE") === "true";
   const baseUrl = _getProperty("NETLIFY_URL") || "";
   const execUrl = _getWebAppExecUrl();
   const archive = _buildIndexHtml(

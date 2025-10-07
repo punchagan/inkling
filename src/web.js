@@ -7,12 +7,20 @@ const doGet = (e) => {
   const webAppTitle = _getWebAppTitle(docId);
   let contentHtml;
 
+  const actionParam = e && e.parameter && e.parameter.action;
+
   // Add subscribe form at the bottom of the Index page
   const allow_subscriptions = _getProperty("WEBAPP_ALLOW_SUBSCRIBE") === "true";
 
   let pageStyle = _extractPageStyle(parsedHtml);
 
-  if (subject) {
+  if (actionParam === "subscribe") {
+    if (allow_subscriptions) {
+      contentHtml = _subscribeFormHtml(execBase);
+    } else {
+      contentHtml = `<p style="color:red;">Subscriptions are not allowed.</p>`;
+    }
+  } else if (subject) {
     contentHtml = _extractEditionSection(parsedHtml, subject, true);
   }
   if (!contentHtml) {

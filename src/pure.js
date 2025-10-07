@@ -15,6 +15,11 @@ const _articleURL = (subject, baseUrl, relative = false) => {
   return webAppUrl;
 };
 
+const _subscribeURL = (baseUrl) => {
+  const isGoogle = baseUrl.includes("script.google.com");
+  return isGoogle ? `${baseUrl}?action=subscribe` : `${baseUrl}/subscribe`;
+};
+
 const _archiveListHtml = (titles, pageTitle, baseUrl) => {
   if (!titles || titles.length === 0) {
     return `<p>No editions found (no <code>Heading 1</code> in the Doc).</p>`;
@@ -48,7 +53,10 @@ const _buildIndexHtml = (
     contentHtml = `${prefix}\n${contentHtml}`;
   }
   if (allow_subscriptions) {
-    contentHtml = `${contentHtml}\n${_subscribeFormHtml(execUrl)}`;
+    // Add link to subscribe form at the bottom
+    const subscribeUrl = _subscribeURL(baseUrl);
+    const subscribeLink = `<p style="margin:32px 0 0;font-size:14px;color:#555"> Want new editions by email? <a href="${subscribeUrl}" target="_top" style="color:#0b66ff;text-decoration:underline">Subscribe here</a>.</p>`;
+    contentHtml = `${contentHtml}\n${subscribeLink}`;
   }
   return contentHtml;
 };
