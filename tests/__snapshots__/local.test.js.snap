@@ -796,7 +796,7 @@ exports[`web 1`] = `
 </head>
 <body>
   <div class="wrap">
-    <header><div class="brand"><a href="/">My Newsletter</a></div></header>
+    <header><div class="brand"><a href="/" target="_top">My Newsletter</a></div></header>
     <main class="doc">
       <h1       id="h.felr2761ljw5"
       style="

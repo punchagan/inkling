@@ -96,9 +96,9 @@ const _buildWebHtml = (
 </head>
 <body>
   <div class="wrap">
-    <header><div class="brand"><a href="/">${_escapeHtml(
-      webAppTitle,
-    )}</a></div></header>
+    <header><div class="brand"><a href="${
+      baseUrl ? baseUrl : "/"
+    }" target="_top">${_escapeHtml(webAppTitle)}</a></div></header>
     <main class="doc">
       ${contentHtml}
       ${footerHtml ? `<div class="footer">${footerHtml}</div>` : ""}
