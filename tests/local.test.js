@@ -12,7 +12,7 @@ const fs = require("fs");
 const HTMLParser = require("node-html-parser");
 global.HTMLParser = HTMLParser;
 
-test("_buildWebHtml", () => {
+test("web", () => {
   const currDir = __dirname;
   const rawHtml = fs.readFileSync(currDir + "/fixtures/raw.html", "utf8");
   const parsed = HTMLParser.parse(rawHtml);
@@ -35,7 +35,7 @@ test("_buildWebHtml", () => {
   expect(html).toMatchSnapshot();
 });
 
-test("_buildIndexHtml", () => {
+test("index", () => {
   const currDir = __dirname;
   const rawHtml = fs.readFileSync(currDir + "/fixtures/raw.html", "utf8");
   const parsed = HTMLParser.parse(rawHtml);
@@ -50,7 +50,7 @@ test("_buildIndexHtml", () => {
   expect(html).toMatchSnapshot();
 });
 
-test("_composeEmailHtml", () => {
+test("email", () => {
   const currDir = __dirname;
   const rawHtml = fs.readFileSync(currDir + "/fixtures/raw.html", "utf8");
   const parsed = HTMLParser.parse(rawHtml);
