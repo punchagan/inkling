@@ -7,13 +7,23 @@ const doGet = (e) => {
   const webAppTitle = _getWebAppTitle(docId);
   let contentHtml;
 
+  // Add subscribe form at the bottom of the Index page
+  const allow_subscriptions = _getProperty("WEBAPP_ALLOW_SUBSCRIBE") === "true";
+
   let pageStyle = _extractPageStyle(parsedHtml);
 
   if (subject) {
     contentHtml = _extractEditionSection(parsedHtml, subject, true);
   }
   if (!contentHtml) {
-    contentHtml = _buildIndexHtml(parsedHtml, webAppTitle, subject, false);
+    contentHtml = _buildIndexHtml(
+      parsedHtml,
+      webAppTitle,
+      execBase,
+      execBase,
+      allow_subscriptions,
+      subject,
+    );
   }
   const pageTitleText = subject
     ? `${subject} — ${webAppTitle}`

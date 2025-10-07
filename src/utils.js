@@ -291,22 +291,6 @@ const _prepareEmailBodyOnce = (introHtml, editionHtml, footerHtml) => {
   return { bodyHtml: html, inlineImages };
 };
 
-const _articleURL = (subject, relative = false, forNetlify = false) => {
-  const netlifyURL = _getProperty("NETLIFY_URL");
-  let webAppUrl;
-
-  if (netlifyURL && forNetlify) {
-    const slug = _slugify(subject);
-    const path = `/article/${slug}.html`;
-    webAppUrl = relative ? path : `${netlifyURL.replace(/\/$/, "")}${path}`;
-  } else {
-    const params = `?subject=${encodeURIComponent(subject)}`;
-    webAppUrl = relative ? `${_getWebAppExecUrl()}${params}` : "";
-  }
-
-  return webAppUrl;
-};
-
 // RFC 2047 "encoded-word" for UTF-8 Subject
 const _encodeRFC2047 = (s) => {
   const utf8 = Utilities.newBlob(String(s ?? "").normalize("NFC")).getBytes();
@@ -387,8 +371,8 @@ const _sendEmailAdvanced = (data) => {
 
 const _sendEmailsFromDoc = (contacts, test = true) => {
   const subject = _getSubject();
-
-  const webAppUrl = _articleURL(subject, false, true);
+  const baseUrl = _getProperty("NETLIFY_URL") || _getWebAppExecUrl();
+  const webAppUrl = _articleURL(subject, baseUrl, false);
   _setMsg("Fetching document…");
   const docId = _getDocId();
   const rawDocHtml = _fetchDocHtml(docId);
@@ -464,72 +448,6 @@ const _sendEmailsFromDoc = (contacts, test = true) => {
   }
 
   _setMsg(`Done. Sent: ${sent}, Failed: ${failed}`);
-};
-
-const _archiveListHtml = (titles, pageTitle, forNetlify) => {
-  if (!titles || titles.length === 0) {
-    return `<p>No editions found (no <code>Heading 1</code> in the Doc).</p>`;
-  }
-  const items = titles
-    .map((t) => {
-      const title = _escapeHtml(t);
-      const url = _articleURL(title, true, forNetlify);
-      return `  <li><a href="${url}" target="_top" rel="noopener">${title}</a></li>`;
-    })
-    .join("\n");
-  return `
-    <h1 style="margin:0 0 12px">${_escapeHtml(pageTitle)}</h1>
-    <ol style="padding-left:20px; line-height:1.7">${items}</ol>
-  `;
-};
-
-const _subscribeFormHtml = () => {
-  return `
-    <form
-        method="POST"
-        action="${_getWebAppExecUrl()}"
-        onsubmit="this.return.value = location.href"
-        target="_top"
-        style="margin:32px 0;max-width:400px;padding:16px;border:1px solid #ddd;border-radius:8px;background:#f9f9f9;>
-
-      <p style="margin:0 0 12px;font-size:14px;color:#555">
-        Get future editions delivered to your inbox.
-      </p>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <input type="hidden" name="return" />
-        <input type="hidden" name="phone" />
-        <input type="text" name="name" placeholder="Your name (optional)"
-          style="flex:1;min-width:160px;padding:8px;font:14px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;border:1px solid #ccc;border-radius:4px" />
-        <input type="email" name="email" placeholder="Your email address" required
-          style="flex:1;min-width:160px;padding:8px;font:14px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;border:1px solid #ccc;border-radius:4px" />
-        <button type="submit"
-          style="padding:8px 16px;font:14px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;color:#fff;background-color:#0b66ff;border:none;border-radius:4px;cursor:pointer">
-          Subscribe
-        </button>
-      </div>
-    </form>
-  `;
-};
-
-const _buildIndexHtml = (
-  parsedHtml,
-  webAppTitle,
-  subject = null,
-  forNetlify = false,
-) => {
-  const titles = _extractAllH1Titles(parsedHtml);
-  let contentHtml = _archiveListHtml(titles, webAppTitle, forNetlify);
-  if (subject) {
-    const subject_ = `“${_escapeHtml(subject)}”`;
-    const prefix = `<p style="color:#b00;margin:0 0 12px">Couldn’t find ${subject_}.</p>`;
-    contentHtml = `${prefix}\n${contentHtml}`;
-  }
-  // Add subscribe form at the bottom of the Index page
-  const allow_subscriptions = _getProperty("WEBAPP_ALLOW_SUBSCRIBE") === "true";
-  if (allow_subscriptions) {
-    contentHtml = `${contentHtml}\n${_subscribeFormHtml()}`;
-  }
-  return contentHtml;
 };
 
 // Allowed bases = your Netlify site + your Web App base

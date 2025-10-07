@@ -1,3 +1,58 @@
+const _articleURL = (subject, baseUrl, relative = false) => {
+  let webAppUrl;
+  const isGoogle = baseUrl.includes("script.google.com");
+  const url = `${baseUrl.replace(/\/$/, "")}`;
+
+  if (isGoogle) {
+    const params = `?subject=${encodeURIComponent(subject)}`;
+    webAppUrl = relative ? `${params}` : `${url}${params}`;
+  } else {
+    const slug = _slugify(subject);
+    const path = `/article/${slug}.html`;
+    webAppUrl = relative ? path : `${url}${path}`;
+  }
+
+  return webAppUrl;
+};
+
+const _archiveListHtml = (titles, pageTitle, baseUrl) => {
+  if (!titles || titles.length === 0) {
+    return `<p>No editions found (no <code>Heading 1</code> in the Doc).</p>`;
+  }
+  const items = titles
+    .map((t) => {
+      const title = _escapeHtml(t);
+      const url = _articleURL(title, baseUrl, true);
+      return `  <li><a href="${url}" target="_top" rel="noopener">${title}</a></li>`;
+    })
+    .join("\n");
+  return `
+    <h1 style="margin:0 0 12px">${_escapeHtml(pageTitle)}</h1>
+    <ol style="padding-left:20px; line-height:1.7">${items}</ol>
+  `;
+};
+
+const _buildIndexHtml = (
+  parsedHtml,
+  webAppTitle,
+  baseUrl,
+  execUrl,
+  allow_subscriptions = false,
+  subject = null,
+) => {
+  const titles = _extractAllH1Titles(parsedHtml);
+  let contentHtml = _archiveListHtml(titles, webAppTitle, baseUrl);
+  if (subject) {
+    const subject_ = `“${_escapeHtml(subject)}”`;
+    const prefix = `<p style="color:#b00;margin:0 0 12px">Couldn’t find ${subject_}.</p>`;
+    contentHtml = `${prefix}\n${contentHtml}`;
+  }
+  if (allow_subscriptions) {
+    contentHtml = `${contentHtml}\n${_subscribeFormHtml(execUrl)}`;
+  }
+  return contentHtml;
+};
+
 const _buildWebHtml = (
   webAppTitle,
   title,
@@ -352,6 +407,34 @@ const _stripHtml = (s) =>
     .replace(/<[^>]+>/g, " ")
     .trim();
 
+const _subscribeFormHtml = (execUrl) => {
+  return `
+    <form
+        method="POST"
+        action="${execUrl}"
+        onsubmit="this.return.value = location.href"
+        target="_top"
+        style="margin:32px 0;max-width:400px;padding:16px;border:1px solid #ddd;border-radius:8px;background:#f9f9f9;">
+
+      <p style="margin:0 0 12px;font-size:14px;color:#555">
+        Get future editions delivered to your inbox.
+      </p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <input type="hidden" name="return" />
+        <input type="hidden" name="phone" />
+        <input type="text" name="name" placeholder="Your name (optional)"
+          style="flex:1;min-width:160px;padding:8px;font:14px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;border:1px solid #ccc;border-radius:4px" />
+        <input type="email" name="email" placeholder="Your email address" required
+          style="flex:1;min-width:160px;padding:8px;font:14px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;border:1px solid #ccc;border-radius:4px" />
+        <button type="submit"
+          style="padding:8px 16px;font:14px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;color:#fff;background-color:#0b66ff;border:none;border-radius:4px;cursor:pointer">
+          Subscribe
+        </button>
+      </div>
+    </form>
+  `;
+};
+
 const _unwrapGoogleRedirects = (html) => {
   // Google Docs export wraps links in a redirect URL like:
   // https://www.google.com/url?q=https://example.com/&sa=D&source=editors&ust=...
@@ -367,6 +450,8 @@ const _unwrapGoogleRedirects = (html) => {
 
 if (typeof module !== "undefined") {
   module.exports = {
+    _articleURL,
+    _buildIndexHtml,
     _buildWebHtml,
     _composeEmailHtml,
     _ensureName,
@@ -381,6 +466,7 @@ if (typeof module !== "undefined") {
     _sha1Hex,
     _slugify,
     _stripHtml,
+    _subscribeFormHtml,
     _unwrapGoogleRedirects,
   };
 }

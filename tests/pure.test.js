@@ -1,4 +1,5 @@
 const {
+  _articleURL,
   _composeEmailHtml,
   _ensureName,
   _escapeHtml,
@@ -14,6 +15,46 @@ const {
 
 const HTMLParser = require("node-html-parser");
 global.HTMLParser = HTMLParser;
+
+test("_articleURL", () => {
+  expect(
+    _articleURL(
+      "Edition 1",
+      "https://inkling-demo.netlify.app",
+      (relative = true),
+    ),
+  ).toBe("/article/edition-1.html");
+  expect(
+    _articleURL(
+      "Edition 1",
+      "https://inkling-demo.netlify.app",
+      (relative = false),
+    ),
+  ).toBe("https://inkling-demo.netlify.app/article/edition-1.html");
+  expect(
+    _articleURL(
+      "  Edition 2  ",
+      "https://inkling-demo.netlify.app",
+      (relative = true),
+    ),
+  ).toBe("/article/edition-2.html");
+  expect(
+    _articleURL(
+      "  Edition 2  ",
+      "https://script.google.com/macros/s/exec",
+      (relative = false),
+    ),
+  ).toBe(
+    "https://script.google.com/macros/s/exec?subject=%20%20Edition%202%20%20",
+  );
+  expect(
+    _articleURL(
+      "  Edition 2  ",
+      "https://script.google.com/macros/s/exec",
+      (relative = true),
+    ),
+  ).toBe("?subject=%20%20Edition%202%20%20");
+});
 
 test("_composeEmailHtml", () => {
   const browserUrl = "http://example.com";

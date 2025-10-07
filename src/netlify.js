@@ -112,7 +112,17 @@ const _buildSiteFiles = () => {
 
   // Archive page
   // NOTE: Assuming no images in index/archive
-  const archive = _buildIndexHtml(parsed, webAppTitle, null, true);
+  const allow_subscriptions = _getProperty("WEBAPP_ALLOW_SUBSCRIBE") === "true";
+  const baseUrl = _getProperty("NETLIFY_URL") || "";
+  const execUrl = _getWebAppExecUrl();
+  const archive = _buildIndexHtml(
+    parsed,
+    webAppTitle,
+    baseUrl,
+    execUrl,
+    allow_subscriptions,
+    null,
+  );
   const page = _buildWebHtml(webAppTitle, webAppTitle, "", archive, footerHtml);
 
   files.push({

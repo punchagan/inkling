@@ -1,4 +1,5 @@
 const {
+  _buildIndexHtml,
   _buildWebHtml,
   _extractEditionSection,
   _extractIntro,
@@ -31,6 +32,21 @@ test("_buildWebHtml", () => {
     footerHtml,
   );
 
+  expect(html).toMatchSnapshot();
+});
+
+test("_buildIndexHtml", () => {
+  const currDir = __dirname;
+  const rawHtml = fs.readFileSync(currDir + "/fixtures/raw.html", "utf8");
+  const parsed = HTMLParser.parse(rawHtml);
+  const allow_subscriptions = true;
+  const html = _buildIndexHtml(
+    parsed,
+    "My Newsletter",
+    "netlify.example.com",
+    "https://script.google.com/macros/s/exec",
+    allow_subscriptions,
+  );
   expect(html).toMatchSnapshot();
 });
 
