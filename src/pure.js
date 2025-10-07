@@ -117,12 +117,12 @@ const _buildWebHtml = (
   return html;
 };
 
-const _composeEmailHtml = (name, bodyHtml, browserUrl) => {
+const _composeEmailHtml = (name, bodyHtml, browserUrl, subscribeUrl) => {
   const safeName = _escapeHtml(_ensureName(name));
   const greeting = `<p style="margin:0 0 12px">Hi ${safeName},</p>`;
   const button = browserUrl
-    ? `<div style="text-align:right;margin:8px 0 16px">
-         <p style="margin:12px 0 16px;font:13px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;color:#666">
+    ? `<div style="text-align:right;margin:8px 0 8px">
+         <p style="margin:8px 0 8px;font:13px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;color:#666">
            Trouble reading this?
             <a href="${browserUrl}" target="_blank" rel="noopener"
                style="font:12px/1.2 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;color:#6b7280;text-decoration:underline">
@@ -131,15 +131,26 @@ const _composeEmailHtml = (name, bodyHtml, browserUrl) => {
          </p>
        </div>`
     : "";
-
+  const subscribeLink = subscribeUrl
+    ? `<div style="text-align:right;margin:8px 0 8px">
+         <p style="margin:8px 0 8px;font:13px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;color:#666">
+           Forwarded Email?
+            <a href="${subscribeUrl}" target="_blank" rel="noopener"
+               style="font:12px/1.2 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;color:#6b7280;text-decoration:underline">
+              Subscribe to future editions
+            </a>
+         </p>
+       </div>`
+    : "";
   return `<!doctype html>
 <html>
 <body style="margin:0;padding:0;background:#ffffff;color:#111111;font:16px/1.5 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial">
   <div style="max-width:640px;margin:0 auto;padding:20px">
     <div style="margin-top:18px">
-      ${button}
-      ${greeting}
-      ${bodyHtml}
+${button}
+${subscribeLink}
+${greeting}
+${bodyHtml}
     </div>
   </div>
 </body>

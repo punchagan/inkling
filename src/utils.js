@@ -374,6 +374,8 @@ const _sendEmailsFromDoc = (contacts, test = true) => {
   const baseUrl = _getProperty("NETLIFY_URL") || _getWebAppExecUrl();
   const webAppUrl = _articleURL(subject, baseUrl, false);
   _setMsg("Fetching document…");
+  const allow_subscriptions = _getProperty("WEBAPP_ALLOW_SUBSCRIBE") === "true";
+  const subscribeUrl = allow_subscriptions ? _subscribeURL(baseUrl) : null;
   const docId = _getDocId();
   const rawDocHtml = _fetchDocHtml(docId);
   const parsedHtml = HTMLParser.parse(rawDocHtml);
@@ -425,6 +427,7 @@ const _sendEmailsFromDoc = (contacts, test = true) => {
         name,
         bodyHtml,
         showViewInBrowser && webAppUrl,
+        subscribeUrl,
       );
 
       _sendEmailAdvanced({

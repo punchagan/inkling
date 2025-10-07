@@ -67,6 +67,7 @@ test("email", () => {
     "Alice",
     bodyHtml,
     "https://example.com/view-in-browser",
+    "https://example.com/subscribe",
   );
   expect(html).toMatchSnapshot();
 });
