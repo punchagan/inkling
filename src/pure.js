@@ -1,25 +1,3 @@
-const _articleURL = (subject, baseUrl, relative = false) => {
-  let webAppUrl;
-  const isGoogle = baseUrl.includes("script.google.com");
-  const url = `${baseUrl.replace(/\/$/, "")}`;
-
-  if (isGoogle) {
-    const params = `?subject=${encodeURIComponent(subject)}`;
-    webAppUrl = relative ? `${params}` : `${url}${params}`;
-  } else {
-    const slug = _slugify(subject);
-    const path = `/article/${slug}.html`;
-    webAppUrl = relative ? path : `${url}${path}`;
-  }
-
-  return webAppUrl;
-};
-
-const _subscribeURL = (baseUrl) => {
-  const isGoogle = baseUrl.includes("script.google.com");
-  return isGoogle ? `${baseUrl}?action=subscribe` : `${baseUrl}/subscribe`;
-};
-
 const _archiveListHtml = (titles, pageTitle, baseUrl) => {
   if (!titles || titles.length === 0) {
     return `<p>No editions found (no <code>Heading 1</code> in the Doc).</p>`;
@@ -35,6 +13,23 @@ const _archiveListHtml = (titles, pageTitle, baseUrl) => {
     <h1 style="margin:0 0 12px">${_escapeHtml(pageTitle)}</h1>
     <ol style="padding-left:20px; line-height:1.7">${items}</ol>
   `;
+};
+
+const _articleURL = (subject, baseUrl, relative = false) => {
+  let webAppUrl;
+  const isGoogle = baseUrl.includes("script.google.com");
+  const url = `${baseUrl.replace(/\/$/, "")}`;
+
+  if (isGoogle) {
+    const params = `?subject=${encodeURIComponent(subject)}`;
+    webAppUrl = relative ? `${params}` : `${url}${params}`;
+  } else {
+    const slug = _slugify(subject);
+    const path = `/article/${slug}.html`;
+    webAppUrl = relative ? path : `${url}${path}`;
+  }
+
+  return webAppUrl;
 };
 
 const _buildIndexHtml = (
@@ -454,6 +449,12 @@ const _subscribeFormHtml = (execUrl) => {
   `;
 };
 
+const _subscribeURL = (baseUrl) => {
+  const isGoogle = baseUrl.includes("script.google.com");
+  const url = `${baseUrl.replace(/\/$/, "")}`;
+  return isGoogle ? `${url}?action=subscribe` : `${url}/subscribe`;
+};
+
 const _unwrapGoogleRedirects = (html) => {
   // Google Docs export wraps links in a redirect URL like:
   // https://www.google.com/url?q=https://example.com/&sa=D&source=editors&ust=...
@@ -486,6 +487,7 @@ if (typeof module !== "undefined") {
     _slugify,
     _stripHtml,
     _subscribeFormHtml,
+    _subscribeURL,
     _unwrapGoogleRedirects,
   };
 }

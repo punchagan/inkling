@@ -11,6 +11,7 @@ const {
   _sanitizeDocHtml,
   _slugify,
   _stripHtml,
+  _subscribeURL,
 } = require("../src/pure");
 
 const HTMLParser = require("node-html-parser");
@@ -278,4 +279,13 @@ test("_stripHtml", () => {
   expect(
     _stripHtml('<a href="http://example.com">Link</a> and <br> line break'),
   ).toBe("Link  and   line break");
+});
+
+test("_subscribeURL", () => {
+  expect(_subscribeURL("https://script.google.com/macros/s/exec/")).toBe(
+    "https://script.google.com/macros/s/exec?action=subscribe",
+  );
+  expect(_subscribeURL("https://example.netlify.app/")).toBe(
+    "https://example.netlify.app/subscribe",
+  );
 });
