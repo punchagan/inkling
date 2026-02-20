@@ -176,7 +176,7 @@ const deployToNetlify = () => {
   );
 
   const deployId = deploy.id;
-  // In some responses you’ll also see "required": ["<sha1>", ...] listing
+  // In some responses you'll also see "required": ["<sha1>", ...] listing
   // blobs not yet on Netlify. But the canonical flow is: for each file,
   // attempt PUT; Netlify stores only the ones it needs.
 

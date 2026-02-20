@@ -154,7 +154,7 @@ const _setSubject = (subject) => {
 
 const _handleEditionChosen = (title, test) => {
   _setSubject(title);
-  _setMsg(`Subject set to “${title}”`);
+  _setMsg(`Subject set to "${title}"`);
   if (test) {
     _setMsg("Sending test…");
     sendTestToMe();
@@ -399,7 +399,7 @@ const _sendEmailsFromDoc = (contacts, test = true) => {
   const emailSubject = test
     ? `[TEST] ${subject} — ${newsletterTitle}`
     : `${subject} — ${newsletterTitle}`;
-  _setMsg(`Sending “${emailSubject}” to ${contacts.length}…`);
+  _setMsg(`Sending "${emailSubject}" to ${contacts.length}…`);
 
   const sh = _sheet();
   const statusCol = CONFIG.SHEET.STATUS_COL;

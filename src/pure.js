@@ -43,8 +43,8 @@ const _buildIndexHtml = (
   const titles = _extractAllH1Titles(parsedHtml);
   let contentHtml = _archiveListHtml(titles, webAppTitle, baseUrl);
   if (subject) {
-    const subject_ = `“${_escapeHtml(subject)}”`;
-    const prefix = `<p style="color:#b00;margin:0 0 12px">Couldn’t find ${subject_}.</p>`;
+    const subject_ = `"${_escapeHtml(subject)}"`;
+    const prefix = `<p style="color:#b00;margin:0 0 12px">Couldn't find ${subject_}.</p>`;
     contentHtml = `${prefix}\n${contentHtml}`;
   }
   if (allow_subscriptions) {
