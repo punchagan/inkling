@@ -1,6 +1,7 @@
 const onOpen = () => {
   SpreadsheetApp.getUi()
     .createMenu("Inkling")
+    .addItem("Preview email", "_previewEmail")
     .addItem("Send test to me", "openEditionSelectorTest")
     .addItem("Send to ALL CONTACTS!", "openEditionSelectorAllContacts")
     .addSeparator()

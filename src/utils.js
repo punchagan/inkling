@@ -52,6 +52,72 @@ const _getWebAppExecUrl = () => {
   }
 };
 
+const _previewEmail = () => {
+  const docId = _getDocId();
+  const titles = _extractAllH1Titles(
+    HTMLParser.parse(_fetchDocHtml(docId)),
+  );
+  if (!titles.length) {
+    SpreadsheetApp.getUi().alert("No editions found (no Heading 1 in the Doc).");
+    return;
+  }
+  const optionsHtml = titles
+    .map((t, i) => {
+      const label = _escapeHtml(t);
+      return `<label style="display:block;margin:6px 0">
+        <input type="radio" name="edition" id="opt_${i}" value="${label}" ${i === 0 ? "checked" : ""} />
+        ${label}
+      </label>`;
+    })
+    .join("\n");
+  const html = `
+<!doctype html><meta charset="utf-8">
+<div style="font:14px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;padding:18px;max-width:520px">
+  <h2 style="margin:0 0 12px">Preview edition</h2>
+  <form id="f">${optionsHtml}
+    <div style="margin-top:16px;display:flex;gap:8px">
+      <button type="submit">Preview</button>
+      <button type="button" onclick="google.script.host.close()">Cancel</button>
+    </div>
+  </form>
+  <p id="status" style="margin-top:10px;color:#555;font-size:13px"></p>
+</div>
+<script>
+  document.getElementById('f').onsubmit = (e) => {
+    e.preventDefault();
+    const sel = document.querySelector('input[name="edition"]:checked');
+    if (!sel) return;
+    document.getElementById('status').textContent = 'Rendering…';
+    google.script.run
+      .withSuccessHandler((previewHtml) => {
+        const w = window.open('', '_blank', 'width=700,height=750');
+        w.document.write(previewHtml);
+        w.document.close();
+        google.script.host.close();
+      })
+      .withFailureHandler((err) => {
+        document.getElementById('status').textContent = 'Error: ' + err.message;
+      })
+      ._renderEditionPreview(sel.value);
+  };
+</script>`;
+  SpreadsheetApp.getUi().showModalDialog(
+    HtmlService.createHtmlOutput(html).setWidth(400).setHeight(400),
+    "Preview Email",
+  );
+};
+
+const _renderEditionPreview = (subject) => {
+  const docId = _getDocId();
+  const parsedHtml = HTMLParser.parse(_fetchDocHtml(docId));
+  const editionHtml = _extractEditionSection(parsedHtml, subject);
+  if (!editionHtml) throw new Error(`No edition found for: "${subject}"`);
+  const introHtml = _extractIntro(parsedHtml);
+  const footerHtml = _extractWrappedFooter(parsedHtml);
+  const bodyHtml = `${introHtml}\n${editionHtml}\n${_sanitizeDocHtml(footerHtml)}`;
+  return _composeEmailHtml("Reader", bodyHtml, null, null);
+};
+
 const _openWebViewDialog = () => {
   const url = _getWebAppExecUrl();
   if (!url)
