@@ -114,7 +114,7 @@ const _renderEditionPreview = (subject) => {
   if (!editionHtml) throw new Error(`No edition found for: "${subject}"`);
   const introHtml = _extractIntro(parsedHtml);
   const footerHtml = _extractWrappedFooter(parsedHtml);
-  const bodyHtml = `${introHtml}\n${editionHtml}\n${_sanitizeDocHtml(footerHtml)}`;
+  const bodyHtml = `${introHtml}\n${_fixImageContainers(editionHtml)}\n${_sanitizeDocHtml(footerHtml)}`;
   return _composeEmailHtml("Reader", bodyHtml, null, null);
 };
 
@@ -350,6 +350,7 @@ const _prepareInlineImages = (html) => {
 };
 
 const _prepareEmailBodyOnce = (introHtml, editionHtml, footerHtml) => {
+  editionHtml = _fixImageContainers(editionHtml);
   footerHtml = _sanitizeDocHtml(footerHtml);
   let fullHtml = `${introHtml}\n${editionHtml}\n${footerHtml}`;
   let { html, inlineImages } = _prepareInlineImages(fullHtml);
@@ -566,7 +567,7 @@ const _redirectHtml = (to, message = "Thank you!") => {
 
 if (typeof module !== "undefined") {
   const Pure = require("./pure.js");
-  Object.assign(global, Pure);
+  Object.assign(global, Pure); // makes _fixImageContainers etc. available
   module.exports = {
     _composeEmailHtml,
     _prepareEmailBodyOnce,

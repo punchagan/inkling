@@ -330,6 +330,17 @@ const _sanitizeDocHtml = (html) => {
   return html.trim();
 };
 
+// Spans with explicit width+height wrapping an <img> are Google Docs image
+// containers. Switch display:inline-block → block so any following text in the
+// same <p> flows below the image instead of beside it.
+const _fixImageContainers = (html) => {
+  if (!html) return "";
+  return html.replace(
+    /(<span\b[^>]*style="(?=[^"]*\bwidth:)(?=[^"]*\bheight:)[^"]*?)display:\s*inline-block([^"]*"[^>]*>\s*<img)/gi,
+    "$1display: block$2",
+  );
+};
+
 const _setImageWidths = (parsedHtml, bodyWidth) => {
   // Set image widths as % of body width, removing any px-based width/height
   // from the image and its parent.
@@ -482,6 +493,7 @@ if (typeof module !== "undefined") {
     _extractPageStyle,
     _extractWrappedFooter,
     _isValidEmail,
+    _fixImageContainers,
     _sanitizeDocHtml,
     _sha1Hex,
     _slugify,

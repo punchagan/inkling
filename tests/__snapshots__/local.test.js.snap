@@ -352,7 +352,7 @@ exports[`email 1`] = `
     >
       <span         style="
           overflow: hidden;
-          display: inline-block;
+          display: block;
           margin: 0px 0px;
           border: 0px solid #000000;
           transform: rotate(0rad) translateZ(0px);
