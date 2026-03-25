@@ -114,8 +114,15 @@ const _renderEditionPreview = (subject) => {
   if (!editionHtml) throw new Error(`No edition found for: "${subject}"`);
   const introHtml = _extractIntro(parsedHtml);
   const footerHtml = _extractWrappedFooter(parsedHtml);
+  const newsletterTitle = _getWebAppTitle(docId);
+  const emailSubject = `${subject} — ${newsletterTitle}`;
   const bodyHtml = `${introHtml}\n${_fixImageContainers(editionHtml)}\n${_sanitizeDocHtml(footerHtml)}`;
-  return _composeEmailHtml("Reader", bodyHtml, null, null);
+  const emailHtml = _composeEmailHtml("Reader", bodyHtml, null, null);
+  // Prepend a subject banner above the email body
+  return emailHtml.replace(
+    "<body",
+    `<div style="background:#f3f4f6;padding:10px 20px;font:13px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;color:#374151;border-bottom:1px solid #d1d5db"><strong>Subject:</strong> ${_escapeHtml(emailSubject)}</div><body`,
+  );
 };
 
 const _openWebViewDialog = () => {
